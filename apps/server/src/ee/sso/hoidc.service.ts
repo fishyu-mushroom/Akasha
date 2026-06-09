@@ -137,7 +137,7 @@ export class HoidcService {
             role: 'member',
             emailVerifiedAt: new Date(),
             lastLoginAt: new Date(),
-            locale: 'en-US',
+            locale: 'zh-CN',
           })
           .returning([
             'id',

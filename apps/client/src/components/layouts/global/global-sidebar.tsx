@@ -153,13 +153,15 @@ export default function GlobalSidebar() {
       </ScrollArea>
 
       <div className={classes.bottomSection}>
-        <UnstyledButton
-          className={classes.link}
-          onClick={openInvite}
-        >
-          <IconUserPlus className={classes.linkIcon} stroke={2} />
-          <span>{t("Invite People")}</span>
-        </UnstyledButton>
+        {isOwner && (
+          <UnstyledButton
+            className={classes.link}
+            onClick={openInvite}
+          >
+            <IconUserPlus className={classes.linkIcon} stroke={2} />
+            <span>{t("Invite People")}</span>
+          </UnstyledButton>
+        )}
         <Link
           className={classes.link}
           data-active={active.startsWith("/settings") || undefined}
