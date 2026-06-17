@@ -48,14 +48,6 @@ export default function McpSettings() {
 
   return (
     <Stack gap="lg">
-      {!hasAccess && (
-        <Alert icon={<IconInfoCircle />} title={upgradeLabel} color="blue">
-          {t(
-            "MCP is only available in the Docmost enterprise edition. Contact sales@docmost.com.",
-          )}
-        </Alert>
-      )}
-
       <Group justify="space-between" wrap="nowrap" gap="xl">
         <div>
           <Text size="md">{t("Model Context Protocol (MCP)")}</Text>

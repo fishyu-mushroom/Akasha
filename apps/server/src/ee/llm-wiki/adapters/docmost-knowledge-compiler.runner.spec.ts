@@ -1,0 +1,241 @@
+import { DocmostKnowledgeCompilerRunner } from './docmost-knowledge-compiler.runner';
+
+describe('DocmostKnowledgeCompilerRunner', () => {
+  it('compiles source snapshots into lineage-preserving page capsules and chunks', async () => {
+    const runner = new TestDocmostKnowledgeCompilerRunner(
+      () => new Date('2026-06-16T00:00:00.000Z'),
+    );
+
+    const result = await runner.compileSpace({
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      compilerVersion: 'docmost-internal@1',
+      promptVersion: 'docmost-enterprise-kb-v1',
+      sources: [
+        {
+          workspaceId: 'workspace-1',
+          spaceId: 'space-1',
+          sourcePageId: 'page-1',
+          sourceVersion: 'v1',
+          contentHash: 'hash-1',
+          title: '项目架构',
+          text: 'Chaterm Flutter 使用分层架构。\n\nUI、service、data 模块按职责拆分。',
+          references: [],
+        },
+      ],
+    });
+
+    expect(result).toEqual({
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      sources: [
+        {
+          workspaceId: 'workspace-1',
+          spaceId: 'space-1',
+          sourcePageId: 'page-1',
+          sourceVersion: 'v1',
+          contentHash: 'hash-1',
+        },
+      ],
+      compilerVersion: 'docmost-internal@1',
+      promptVersion: 'docmost-enterprise-kb-v1',
+      compilerRunId: 'workspace-1:space-1:2026-06-16T00:00:00.000Z',
+      artifacts: [
+        expect.objectContaining({
+          artifactId: expect.stringMatching(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+          ),
+          workspaceId: 'workspace-1',
+          spaceId: 'space-1',
+          title: '项目架构',
+          contentMarkdown:
+            '# 项目架构\n\nChaterm Flutter 使用分层架构。\n\nUI、service、data 模块按职责拆分。',
+          sourcePageIds: ['page-1'],
+          compilerVersion: 'docmost-internal@1',
+          promptVersion: 'docmost-enterprise-kb-v1',
+          compilerRunId: 'workspace-1:space-1:2026-06-16T00:00:00.000Z',
+          compileTaskId: 'docmost-page:page-1',
+          inputSourceRefs: [
+            {
+              workspaceId: 'workspace-1',
+              spaceId: 'space-1',
+              sourcePageId: 'page-1',
+              sourceVersion: 'v1',
+              contentHash: 'hash-1',
+            },
+          ],
+          chunks: [
+            {
+              text: 'Chaterm Flutter 使用分层架构。\n\nUI、service、data 模块按职责拆分。',
+              inputSourceRefs: [
+                {
+                  workspaceId: 'workspace-1',
+                  spaceId: 'space-1',
+                  sourcePageId: 'page-1',
+                  sourceVersion: 'v1',
+                  contentHash: 'hash-1',
+                },
+              ],
+            },
+          ],
+        }),
+      ],
+      diagnostics: { warnings: [], errors: [] },
+    });
+  });
+
+  it('skips empty sources and reports diagnostics', async () => {
+    const runner = new TestDocmostKnowledgeCompilerRunner(
+      () => new Date('2026-06-16T00:00:00.000Z'),
+    );
+
+    const result = await runner.compileSpace({
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      compilerVersion: 'docmost-internal@1',
+      promptVersion: 'docmost-enterprise-kb-v1',
+      sources: [
+        {
+          workspaceId: 'workspace-1',
+          spaceId: 'space-1',
+          sourcePageId: 'page-1',
+          sourceVersion: 'v1',
+          contentHash: 'hash-1',
+          title: 'Empty',
+          text: '   ',
+          references: [],
+        },
+      ],
+    });
+
+    expect(result.artifacts).toEqual([]);
+    expect(result.diagnostics.warnings).toEqual([
+      {
+        code: 'empty_source',
+        message: 'Source page has no text content and was skipped.',
+        sourcePageId: 'page-1',
+      },
+    ]);
+  });
+
+  it('creates same-space links when a source mentions another source title', async () => {
+    const runner = new TestDocmostKnowledgeCompilerRunner(
+      () => new Date('2026-06-16T00:00:00.000Z'),
+    );
+
+    const result = await runner.compileSpace({
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      compilerVersion: 'docmost-internal@1',
+      promptVersion: 'docmost-enterprise-kb-v1',
+      sources: [
+        {
+          workspaceId: 'workspace-1',
+          spaceId: 'space-1',
+          sourcePageId: 'page-registration',
+          sourceVersion: 'v1',
+          contentHash: 'hash-registration',
+          title: 'Chaterm 企业版登记信息',
+          text:
+            'Chaterm 企业版软件的登记批准日期是 2026年06月05日。\n\n' +
+            '该登记信息和 Chaterm KMS 加密架构有关。',
+          references: [],
+        },
+        {
+          workspaceId: 'workspace-1',
+          spaceId: 'space-1',
+          sourcePageId: 'page-kms',
+          sourceVersion: 'v1',
+          contentHash: 'hash-kms',
+          title: 'Chaterm KMS 加密架构',
+          text: 'Chaterm KMS 加密架构使用 AWS KMS 和信封加密保护敏感数据。',
+          references: [],
+        },
+      ],
+    });
+
+    expect(result.artifacts[0].links).toEqual([
+      {
+        linkType: 'same_space_reference',
+        linkText: 'Chaterm KMS 加密架构',
+        targetPageId: 'page-kms',
+        targetSpaceId: 'space-1',
+        toKnowledgePageId: result.artifacts[1].artifactId,
+        isDangling: false,
+        inputSourceRefs: result.artifacts[0].inputSourceRefs,
+      },
+    ]);
+  });
+
+  it('creates semantic graph edges for related pages without explicit title mentions', async () => {
+    const runner = new TestDocmostKnowledgeCompilerRunner(
+      () => new Date('2026-06-16T00:00:00.000Z'),
+    );
+
+    const result = await runner.compileSpace({
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      compilerVersion: 'docmost-internal@1',
+      promptVersion: 'docmost-enterprise-kb-v1',
+      sources: [
+        {
+          workspaceId: 'workspace-1',
+          spaceId: 'space-1',
+          sourcePageId: 'page-kms',
+          sourceVersion: 'v1',
+          contentHash: 'hash-kms',
+          title: 'KMS 密钥轮换策略',
+          text:
+            '服务端使用 KMS 管理主密钥，按周期轮换数据密钥。' +
+            '敏感字段采用信封加密，密钥材料不会落入业务日志。',
+          references: [],
+        },
+        {
+          workspaceId: 'workspace-1',
+          spaceId: 'space-1',
+          sourcePageId: 'page-encryption',
+          sourceVersion: 'v1',
+          contentHash: 'hash-encryption',
+          title: '企业数据加密方案',
+          text:
+            '企业版保护敏感字段时使用信封加密。' +
+            '数据密钥由 KMS 派生并定期轮换，主密钥只在托管服务中使用。',
+          references: [],
+        },
+        {
+          workspaceId: 'workspace-1',
+          spaceId: 'space-1',
+          sourcePageId: 'page-mobile',
+          sourceVersion: 'v1',
+          contentHash: 'hash-mobile',
+          title: '移动端登录交互',
+          text: '移动端登录页包含手机号输入、验证码倒计时和错误提示。',
+          references: [],
+        },
+      ],
+    });
+
+    expect(result.artifacts[0].graphEdges).toEqual([
+      {
+        toKnowledgePageId: result.artifacts[1].artifactId,
+        relation: expect.stringContaining('相关'),
+        inputSourceRefs: [
+          result.artifacts[0].inputSourceRefs?.[0],
+          result.artifacts[1].inputSourceRefs?.[0],
+        ],
+      },
+    ]);
+    expect(result.artifacts[0].links).toBeUndefined();
+    expect(result.artifacts[2].graphEdges).toBeUndefined();
+  });
+});
+
+class TestDocmostKnowledgeCompilerRunner extends DocmostKnowledgeCompilerRunner {
+  constructor(private readonly testNow: () => Date) {
+    super();
+  }
+
+  protected now(): Date {
+    return this.testNow();
+  }
+}

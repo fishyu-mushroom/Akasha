@@ -19,6 +19,7 @@ import {
   executeWithCursorPagination,
 } from '@docmost/db/pagination/cursor-pagination';
 import { PagePermissionMember } from './types/page-permission.types';
+import { SourcePageRestrictedAncestorRequirements } from './types/page-permission.types';
 import { withCache } from '../../../common/helpers/with-cache';
 import {
   CacheKey,
@@ -728,6 +729,103 @@ export class PagePermissionRepo {
       .execute();
 
     return results.map((r) => r.id);
+  }
+
+  async findRestrictedAncestorRequirementsForPages(
+    pageIds: string[],
+  ): Promise<SourcePageRestrictedAncestorRequirements[]> {
+    if (pageIds.length === 0) return [];
+
+    const rows = await this.db
+      .withRecursive('allAncestors', (qb) =>
+        qb
+          .selectFrom('pages')
+          .select([
+            'pages.id as sourcePageId',
+            'pages.spaceId as sourceSpaceId',
+            'pages.id as ancestorId',
+            'pages.parentPageId',
+            sql<number>`0`.as('depth'),
+          ])
+          .where(sql<SqlBool>`pages.id = ANY(${pageIds}::uuid[])`)
+          .unionAll((eb) =>
+            eb
+              .selectFrom('pages')
+              .innerJoin(
+                'allAncestors',
+                'allAncestors.parentPageId',
+                'pages.id',
+              )
+              .select([
+                'allAncestors.sourcePageId',
+                'allAncestors.sourceSpaceId',
+                'pages.id as ancestorId',
+                'pages.parentPageId',
+                sql<number>`${sql.ref('allAncestors.depth')} + 1`.as('depth'),
+              ]),
+          ),
+      )
+      .selectFrom('allAncestors')
+      .innerJoin('pageAccess', 'pageAccess.pageId', 'allAncestors.ancestorId')
+      .leftJoin(
+        'pagePermissions',
+        'pagePermissions.pageAccessId',
+        'pageAccess.id',
+      )
+      .select([
+        'allAncestors.sourcePageId',
+        'allAncestors.sourceSpaceId',
+        'pageAccess.id as pageAccessId',
+        'pageAccess.pageId as restrictedPageId',
+        'allAncestors.depth',
+        'pagePermissions.userId',
+        'pagePermissions.groupId',
+        'pagePermissions.role',
+      ])
+      .orderBy('allAncestors.sourcePageId', 'asc')
+      .orderBy('allAncestors.depth', 'asc')
+      .execute();
+
+    const bySource = new Map<string, SourcePageRestrictedAncestorRequirements>();
+    const byRequirement = new Map<
+      string,
+      SourcePageRestrictedAncestorRequirements['restrictedAncestors'][number]
+    >();
+
+    for (const row of rows) {
+      let source = bySource.get(row.sourcePageId);
+      if (!source) {
+        source = {
+          sourcePageId: row.sourcePageId,
+          sourceSpaceId: row.sourceSpaceId,
+          restrictedAncestors: [],
+        };
+        bySource.set(row.sourcePageId, source);
+      }
+
+      const requirementKey = `${row.sourcePageId}:${row.pageAccessId}`;
+      let requirement = byRequirement.get(requirementKey);
+      if (!requirement) {
+        requirement = {
+          pageAccessId: row.pageAccessId,
+          restrictedPageId: row.restrictedPageId,
+          depth: row.depth,
+          permissions: [],
+        };
+        source.restrictedAncestors.push(requirement);
+        byRequirement.set(requirementKey, requirement);
+      }
+
+      if (row.userId || row.groupId) {
+        requirement.permissions.push({
+          userId: row.userId,
+          groupId: row.groupId,
+          role: row.role,
+        });
+      }
+    }
+
+    return [...bySource.values()];
   }
 
   async filterAccessiblePageIdsWithPermissions(

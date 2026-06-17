@@ -1085,5 +1085,16 @@
   "Added {{name}} to favorites": "Added {{name}} to favorites",
   "Removed {{name}} from favorites": "Removed {{name}} from favorites",
   "Page menu for {{name}}": "Page menu for {{name}}",
-  "Create subpage of {{name}}": "Create subpage of {{name}}"
+  "Create subpage of {{name}}": "Create subpage of {{name}}",
+  "Knowledge": "Knowledge",
+  "Relationship graph": "Relationship graph",
+  "No relationship graph yet": "No relationship graph yet",
+  "Question": "Question",
+  "Update knowledge": "Update knowledge",
+  "Knowledge update queued": "Queued knowledge update for {{count}} spaces",
+  "Ask": "Ask",
+  "Answer": "Answer",
+  "Citations": "Citations",
+  "No citations": "No citations",
+  "No answer returned.": "No answer returned."
 }

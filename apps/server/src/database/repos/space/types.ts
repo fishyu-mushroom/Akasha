@@ -3,6 +3,10 @@ export interface UserSpaceRole {
   role: string;
 }
 
+export interface UserSpaceRoleWithSpaceId extends UserSpaceRole {
+  spaceId: string;
+}
+
 interface SpaceUserInfo {
   id: string;
   name: string;

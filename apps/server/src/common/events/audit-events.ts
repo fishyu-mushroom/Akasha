@@ -96,6 +96,11 @@ export const AuditEvent = {
   LICENSE_ACTIVATED: 'license.activated',
   LICENSE_REMOVED: 'license.removed',
 
+  // Knowledge
+  KNOWLEDGE_QUERY: 'knowledge.query',
+  KNOWLEDGE_IMPORT: 'knowledge.import',
+  KNOWLEDGE_COMPILE_QUEUED: 'knowledge.compile_queued',
+
   // Attachment
   ATTACHMENT_UPLOADED: 'attachment.uploaded',
   // ATTACHMENT_DELETED: 'attachment.deleted',
@@ -129,6 +134,7 @@ export const AuditResource = {
   WORKSPACE_INVITATION: 'workspace_invitation',
   ATTACHMENT: 'attachment',
   LICENSE: 'license',
+  KNOWLEDGE: 'knowledge',
 } as const;
 
 export type AuditResourceType =

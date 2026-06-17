@@ -129,6 +129,93 @@ export class PageRepo {
     return query.execute();
   }
 
+  async findExistingPageRefs(input: {
+    workspaceId: string;
+    pageIds: string[];
+  }): Promise<
+    Array<{
+      id: string;
+      workspaceId: string;
+      spaceId: string;
+      deletedAt: Date | null;
+    }>
+  > {
+    if (input.pageIds.length === 0) return [];
+
+    return this.db
+      .selectFrom('pages')
+      .select(['id', 'workspaceId', 'spaceId', 'deletedAt'])
+      .where('workspaceId', '=', input.workspaceId)
+      .where('id', 'in', input.pageIds)
+      .execute();
+  }
+
+  async findSpaceIdsForPages(input: {
+    workspaceId: string;
+    pageIds: string[];
+  }): Promise<string[]> {
+    if (input.pageIds.length === 0) return [];
+
+    const rows = await this.db
+      .selectFrom('pages')
+      .select('spaceId')
+      .distinct()
+      .where('workspaceId', '=', input.workspaceId)
+      .where('id', 'in', input.pageIds)
+      .where('deletedAt', 'is', null)
+      .execute();
+
+    return rows.map((row) => row.spaceId);
+  }
+
+  async getPageAndDescendantIds(input: {
+    rootPageId: string;
+    workspaceId: string;
+  }): Promise<string[]> {
+    const pages = await this.db
+      .withRecursive('page_descendants', (db) =>
+        db
+          .selectFrom('pages')
+          .select(['id'])
+          .where('id', '=', input.rootPageId)
+          .where('workspaceId', '=', input.workspaceId)
+          .unionAll((exp) =>
+            exp
+              .selectFrom('pages as p')
+              .select(['p.id'])
+              .innerJoin('page_descendants as pd', 'pd.id', 'p.parentPageId')
+              .where('p.workspaceId', '=', input.workspaceId),
+          ),
+      )
+      .selectFrom('page_descendants')
+      .selectAll()
+      .execute();
+
+    return pages.map((page) => page.id);
+  }
+
+  async findPagesForKnowledgeExport(input: {
+    workspaceId: string;
+    spaceId: string;
+  }): Promise<
+    Array<{
+      id: string;
+      workspaceId: string;
+      spaceId: string;
+      title: string;
+      textContent: string | null;
+      updatedAt: Date;
+    }>
+  > {
+    return this.db
+      .selectFrom('pages')
+      .select(['id', 'workspaceId', 'spaceId', 'title', 'textContent', 'updatedAt'])
+      .where('workspaceId', '=', input.workspaceId)
+      .where('spaceId', '=', input.spaceId)
+      .where('deletedAt', 'is', null)
+      .execute();
+  }
+
   async updatePage(
     updatablePage: UpdatablePage,
     pageId: string,

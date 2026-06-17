@@ -1,0 +1,21 @@
+import { MODULE_METADATA } from '@nestjs/common/constants';
+import { DocmostKnowledgeCompilerRunner } from './adapters/docmost-knowledge-compiler.runner';
+import { KNOWLEDGE_COMPILER_RUNNER } from './llm-wiki.constants';
+import { LlmWikiModule } from './llm-wiki.module';
+
+describe('LlmWikiModule', () => {
+  it('uses the project-local Docmost runner for compile jobs', () => {
+    const providers =
+      Reflect.getMetadata(MODULE_METADATA.PROVIDERS, LlmWikiModule) ?? [];
+
+    expect(providers).toEqual(
+      expect.arrayContaining([
+        DocmostKnowledgeCompilerRunner,
+        expect.objectContaining({
+          provide: KNOWLEDGE_COMPILER_RUNNER,
+          useExisting: DocmostKnowledgeCompilerRunner,
+        }),
+      ]),
+    );
+  });
+});

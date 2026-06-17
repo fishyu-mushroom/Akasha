@@ -21,6 +21,7 @@ const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp", "gif"];
 const ACCEPTED_FILE_TYPES = ".pdf,.docx,.txt,.csv,.md,.png,.jpg,.jpeg,.webp";
 // Kept in sync with MAX_ATTACHMENTS_PER_MESSAGE in apps/server/src/ee/ai-chat/ai-chat-limits.ts
 const MAX_ATTACHMENTS_PER_MESSAGE = 5;
+const FILE_ATTACHMENTS_DISABLED = true;
 
 type Props = {
   isStreaming: boolean;
@@ -281,6 +282,7 @@ export default function ChatInput({
         accept={ACCEPTED_FILE_TYPES}
         multiple
         aria-label={t("Add files")}
+        disabled={FILE_ATTACHMENTS_DISABLED}
         tabIndex={-1}
         style={{ display: "none" }}
         onChange={(e) => handleFileSelect(e.target.files)}
@@ -360,12 +362,18 @@ export default function ChatInput({
               type="button"
               className={classes.plusMenuItem}
               onClick={() => {
+                if (FILE_ATTACHMENTS_DISABLED) return;
                 fileInputRef.current?.click();
                 setPlusMenuOpen(false);
               }}
-              disabled={pendingAttachments.length >= MAX_ATTACHMENTS_PER_MESSAGE}
-              title={
+              disabled={
+                FILE_ATTACHMENTS_DISABLED ||
                 pendingAttachments.length >= MAX_ATTACHMENTS_PER_MESSAGE
+              }
+              title={
+                FILE_ATTACHMENTS_DISABLED
+                  ? t("正在快速开发中")
+                  : pendingAttachments.length >= MAX_ATTACHMENTS_PER_MESSAGE
                   ? t("Max {{max}} files per message", {
                       max: MAX_ATTACHMENTS_PER_MESSAGE,
                     })
@@ -373,7 +381,12 @@ export default function ChatInput({
               }
             >
               <IconPaperclip size={16} className={classes.plusMenuIcon} />
-              {t("Add files")}
+              <span className={classes.plusMenuText}>{t("Add files")}</span>
+              {FILE_ATTACHMENTS_DISABLED && (
+                <span className={classes.plusMenuHint}>
+                  {t("正在快速开发中")}
+                </span>
+              )}
             </button>
             <button
               type="button"

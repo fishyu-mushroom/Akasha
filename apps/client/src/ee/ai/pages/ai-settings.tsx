@@ -56,19 +56,6 @@ export default function AiSettings() {
         </Tabs.List>
 
         <Tabs.Panel value="ai" pt="md">
-          {!hasAccess && (
-            <Alert
-              icon={<IconInfoCircle />}
-              title={upgradeLabel}
-              color="blue"
-              mb="lg"
-            >
-              {t(
-                "AI is only available in the Docmost enterprise edition. Contact sales@docmost.com.",
-              )}
-            </Alert>
-          )}
-
           <Stack gap="md">
             {!isCloud() && <EnableAiSearch />}
             <EnableGenerativeAi />
