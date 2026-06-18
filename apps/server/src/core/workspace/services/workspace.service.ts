@@ -386,9 +386,10 @@ export class WorkspaceService {
 
       if (
         typeof updateWorkspaceDto.trashRetentionDays !== 'undefined' &&
-        updateWorkspaceDto.trashRetentionDays !== ws.trashRetentionDays
+        updateWorkspaceDto.trashRetentionDays !==
+          Number(ws.trashRetentionDays)
       ) {
-        before.trashRetentionDays = ws.trashRetentionDays;
+        before.trashRetentionDays = Number(ws.trashRetentionDays);
         after.trashRetentionDays = updateWorkspaceDto.trashRetentionDays;
       }
     }

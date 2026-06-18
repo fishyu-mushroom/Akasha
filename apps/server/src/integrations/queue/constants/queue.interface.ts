@@ -113,3 +113,25 @@ export interface IApprovalRejectedNotificationJob {
   requestedById: string;
   comment?: string;
 }
+
+export interface IKnowledgeCompileSpaceJob {
+  workspaceId: string;
+  spaceId: string;
+  trigger?:
+    | 'manual_compile'
+    | 'retry_compile'
+    | 'rebuild_embeddings'
+    | 'page_update';
+}
+
+export interface IKnowledgeReindexAccessJob {
+  workspaceId: string;
+  spaceId?: string;
+  sourcePageIds?: string[];
+}
+
+export interface IKnowledgeMarkSourcesStaleJob {
+  workspaceId: string;
+  sourcePageIds?: string[];
+  spaceId?: string;
+}

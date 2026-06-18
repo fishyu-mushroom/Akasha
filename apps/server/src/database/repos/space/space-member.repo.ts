@@ -11,7 +11,7 @@ import {
   UpdatableSpaceMember,
 } from '@docmost/db/types/entity.types';
 import { PaginationOptions } from '../../pagination/pagination-options';
-import { MemberInfo, UserSpaceRole } from './types';
+import { MemberInfo, UserSpaceRole, UserSpaceRoleWithSpaceId } from './types';
 import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
 import { GroupRepo } from '@docmost/db/repos/group/group.repo';
 import { SpaceRepo } from '@docmost/db/repos/space/space.repo';
@@ -252,6 +252,28 @@ export class SpaceMemberRepo {
         return roles;
       },
     );
+  }
+
+  async findUserSpaceRolesForSpaces(input: {
+    userId: string;
+    spaceIds: string[];
+  }): Promise<UserSpaceRoleWithSpaceId[]> {
+    if (input.spaceIds.length === 0) return [];
+
+    return this.db
+      .selectFrom('spaceMembers')
+      .select(['userId', 'spaceId', 'role'])
+      .where('userId', '=', input.userId)
+      .where('spaceId', 'in', input.spaceIds)
+      .unionAll(
+        this.db
+          .selectFrom('spaceMembers')
+          .innerJoin('groupUsers', 'groupUsers.groupId', 'spaceMembers.groupId')
+          .select(['groupUsers.userId', 'spaceMembers.spaceId', 'role'])
+          .where('groupUsers.userId', '=', input.userId)
+          .where('spaceMembers.spaceId', 'in', input.spaceIds),
+      )
+      .execute();
   }
 
   async getUserIdsWithSpaceAccess(

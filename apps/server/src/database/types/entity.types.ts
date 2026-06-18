@@ -30,6 +30,23 @@ import {
   Shares,
   Favorites,
   FileTasks,
+  KnowledgeChunks,
+  KnowledgeChunkSources,
+  KnowledgeClaims,
+  KnowledgeClaimSources,
+  KnowledgeGraphEdges,
+  KnowledgeGraphEdgeSources,
+  KnowledgeLinks,
+  KnowledgeLinkSources,
+  KnowledgePages,
+  KnowledgePageSources,
+  KnowledgeQueryAudit,
+  KnowledgeQuarantinedArtifacts,
+  KnowledgeSourceAccessPolicy as _KnowledgeSourceAccessPolicy,
+  KnowledgeSourceAccessPrincipals as _KnowledgeSourceAccessPrincipals,
+  KnowledgeSourceAccessRequirements as _KnowledgeSourceAccessRequirements,
+  KnowledgeSourceChunks,
+  KnowledgeSources,
   UserMfa as _UserMFA,
   UserSessions,
   ApiKeys,
@@ -54,6 +71,83 @@ export type InsertableAiChatMessage = Omit<
   Insertable<AiChatMessages>,
   'tsv'
 >;
+
+// LLM Wiki Knowledge Base
+export type KnowledgeSource = Selectable<KnowledgeSources>;
+export type InsertableKnowledgeSource = Insertable<KnowledgeSources>;
+export type UpdatableKnowledgeSource = Updateable<Omit<KnowledgeSources, 'id'>>;
+
+export type KnowledgeSourceChunk = Selectable<KnowledgeSourceChunks>;
+export type InsertableKnowledgeSourceChunk =
+  Insertable<KnowledgeSourceChunks>;
+export type UpdatableKnowledgeSourceChunk = Updateable<
+  Omit<KnowledgeSourceChunks, 'id'>
+>;
+
+export type KnowledgePage = Selectable<KnowledgePages>;
+export type InsertableKnowledgePage = Insertable<KnowledgePages>;
+export type UpdatableKnowledgePage = Updateable<Omit<KnowledgePages, 'id'>>;
+
+export type KnowledgePageSource = Selectable<KnowledgePageSources>;
+export type InsertableKnowledgePageSource = Insertable<KnowledgePageSources>;
+
+export type KnowledgeClaim = Selectable<KnowledgeClaims>;
+export type InsertableKnowledgeClaim = Insertable<KnowledgeClaims>;
+export type UpdatableKnowledgeClaim = Updateable<Omit<KnowledgeClaims, 'id'>>;
+
+export type KnowledgeClaimSource = Selectable<KnowledgeClaimSources>;
+export type InsertableKnowledgeClaimSource = Insertable<KnowledgeClaimSources>;
+
+export type KnowledgeChunk = Selectable<KnowledgeChunks>;
+export type InsertableKnowledgeChunk = Insertable<KnowledgeChunks>;
+export type UpdatableKnowledgeChunk = Updateable<Omit<KnowledgeChunks, 'id'>>;
+
+export type KnowledgeChunkSource = Selectable<KnowledgeChunkSources>;
+export type InsertableKnowledgeChunkSource = Insertable<KnowledgeChunkSources>;
+
+export type KnowledgeLink = Selectable<KnowledgeLinks>;
+export type InsertableKnowledgeLink = Insertable<KnowledgeLinks>;
+export type UpdatableKnowledgeLink = Updateable<Omit<KnowledgeLinks, 'id'>>;
+
+export type KnowledgeLinkSource = Selectable<KnowledgeLinkSources>;
+export type InsertableKnowledgeLinkSource = Insertable<KnowledgeLinkSources>;
+
+export type KnowledgeGraphEdge = Selectable<KnowledgeGraphEdges>;
+export type InsertableKnowledgeGraphEdge = Insertable<KnowledgeGraphEdges>;
+export type UpdatableKnowledgeGraphEdge = Updateable<
+  Omit<KnowledgeGraphEdges, 'id'>
+>;
+
+export type KnowledgeGraphEdgeSource =
+  Selectable<KnowledgeGraphEdgeSources>;
+export type InsertableKnowledgeGraphEdgeSource =
+  Insertable<KnowledgeGraphEdgeSources>;
+
+export type KnowledgeSourceAccessPolicy =
+  Selectable<_KnowledgeSourceAccessPolicy>;
+export type InsertableKnowledgeSourceAccessPolicy =
+  Insertable<_KnowledgeSourceAccessPolicy>;
+export type UpdatableKnowledgeSourceAccessPolicy =
+  Updateable<_KnowledgeSourceAccessPolicy>;
+
+export type KnowledgeSourceAccessRequirement =
+  Selectable<_KnowledgeSourceAccessRequirements>;
+export type InsertableKnowledgeSourceAccessRequirement =
+  Insertable<_KnowledgeSourceAccessRequirements>;
+
+export type KnowledgeSourceAccessPrincipal =
+  Selectable<_KnowledgeSourceAccessPrincipals>;
+export type InsertableKnowledgeSourceAccessPrincipal =
+  Insertable<_KnowledgeSourceAccessPrincipals>;
+
+export type KnowledgeQueryAuditEntry = Selectable<KnowledgeQueryAudit>;
+export type InsertableKnowledgeQueryAuditEntry =
+  Insertable<KnowledgeQueryAudit>;
+
+export type KnowledgeQuarantinedArtifact =
+  Selectable<KnowledgeQuarantinedArtifacts>;
+export type InsertableKnowledgeQuarantinedArtifact =
+  Insertable<KnowledgeQuarantinedArtifacts>;
 
 // Workspace
 export type Workspace = Selectable<Workspaces>;

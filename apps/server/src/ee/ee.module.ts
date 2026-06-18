@@ -3,8 +3,17 @@ import { SsoModule } from './sso/sso.module';
 import { ApiKeyModule } from './api-key/api-key.module';
 import { DocumentImportModule } from './document-import/document-import.module';
 import { ConfluenceImportModule } from './confluence-import/confluence-import.module';
+import { LlmWikiModule } from './llm-wiki/llm-wiki.module';
+import { AiChatModule } from './ai-chat/ai-chat.module';
 
 @Module({
-  imports: [SsoModule, ApiKeyModule, DocumentImportModule, ConfluenceImportModule],
+  imports: [
+    SsoModule,
+    ApiKeyModule,
+    DocumentImportModule,
+    ConfluenceImportModule,
+    LlmWikiModule,
+    AiChatModule,
+  ],
 })
 export class EeModule {}

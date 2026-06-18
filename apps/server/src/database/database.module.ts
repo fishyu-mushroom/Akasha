@@ -31,6 +31,12 @@ import { PageListener } from '@docmost/db/listeners/page.listener';
 import { PostgresJSDialect } from 'kysely-postgres-js';
 import * as postgres from 'postgres';
 import { normalizePostgresUrl } from '../common/helpers';
+import { KnowledgeSourceRepo } from '@docmost/db/repos/llm-wiki/knowledge-source.repo';
+import { KnowledgeCapsuleRepo } from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
+import { KnowledgeAccessPolicyRepo } from '@docmost/db/repos/llm-wiki/knowledge-access-policy.repo';
+import { KnowledgeQueryAuditRepo } from '@docmost/db/repos/llm-wiki/knowledge-query-audit.repo';
+import { KnowledgeQuarantineRepo } from '@docmost/db/repos/llm-wiki/knowledge-quarantine.repo';
+import { AiChatRepo } from '@docmost/db/repos/ai-chat/ai-chat.repo';
 
 @Global()
 @Module({
@@ -92,6 +98,12 @@ import { normalizePostgresUrl } from '../common/helpers';
     WatcherRepo,
     LabelRepo,
     TemplateRepo,
+    KnowledgeSourceRepo,
+    KnowledgeCapsuleRepo,
+    KnowledgeAccessPolicyRepo,
+    KnowledgeQueryAuditRepo,
+    KnowledgeQuarantineRepo,
+    AiChatRepo,
     PageListener,
   ],
   exports: [
@@ -117,6 +129,12 @@ import { normalizePostgresUrl } from '../common/helpers';
     WatcherRepo,
     LabelRepo,
     TemplateRepo,
+    KnowledgeSourceRepo,
+    KnowledgeCapsuleRepo,
+    KnowledgeAccessPolicyRepo,
+    KnowledgeQueryAuditRepo,
+    KnowledgeQuarantineRepo,
+    AiChatRepo,
   ],
 })
 export class DatabaseModule implements OnApplicationBootstrap {

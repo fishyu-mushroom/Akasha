@@ -16,10 +16,10 @@ export default function EnableAiSearch() {
     <>
       <Group justify="space-between" wrap="nowrap" gap="xl">
         <div>
-          <Text size="md">{t("AI-powered search (AI Answers)")}</Text>
+          <Text size="md">{t("知识库")}</Text>
           <Text size="sm" c="dimmed">
             {t(
-              "AI search uses vector embeddings to provide semantic search capabilities across your workspace content.",
+              "启用知识库编译、检索和基于权限的问答能力，支持用户查询工作空间内容。",
             )}
           </Text>
         </div>
@@ -64,7 +64,7 @@ export function AiSearchToggle({ size, label }: AiSearchToggleProps) {
         defaultChecked={checked}
         onChange={handleChange}
         disabled={!hasAccess}
-        aria-label={t("Toggle AI search")}
+        aria-label={t("Toggle knowledge base")}
       />
     </Tooltip>
   );

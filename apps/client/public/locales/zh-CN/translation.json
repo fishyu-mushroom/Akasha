@@ -1084,5 +1084,16 @@
   "Added {{name}} to favorites": "已将 {{name}} 添加到收藏",
   "Removed {{name}} from favorites": "已将 {{name}} 从收藏中移除",
   "Page menu for {{name}}": "{{name}} 的页面菜单",
-  "Create subpage of {{name}}": "创建 {{name}} 的子页面"
+  "Create subpage of {{name}}": "创建 {{name}} 的子页面",
+  "Knowledge": "知识库",
+  "Relationship graph": "关系图谱",
+  "No relationship graph yet": "暂无关系图谱",
+  "Question": "问题",
+  "Update knowledge": "更新知识库",
+  "Knowledge update queued": "已提交 {{count}} 个空间的知识库更新",
+  "Ask": "提问",
+  "Answer": "回答",
+  "Citations": "引用",
+  "No citations": "无引用",
+  "No answer returned.": "没有返回回答。"
 }
