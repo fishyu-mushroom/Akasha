@@ -100,6 +100,8 @@ export const AuditEvent = {
   KNOWLEDGE_QUERY: 'knowledge.query',
   KNOWLEDGE_IMPORT: 'knowledge.import',
   KNOWLEDGE_COMPILE_QUEUED: 'knowledge.compile_queued',
+  KNOWLEDGE_REVIEW_DISCOVERED: 'knowledge.review_discovered',
+  KNOWLEDGE_REVIEW_NEGOTIATED: 'knowledge.review_negotiated',
 
   // Attachment
   ATTACHMENT_UPLOADED: 'attachment.uploaded',
@@ -116,7 +118,7 @@ export const EXCLUDED_AUDIT_EVENTS: Set<string> = new Set([
   AuditEvent.COMMENT_UPDATED,
   AuditEvent.COMMENT_RESOLVED,
   AuditEvent.COMMENT_REOPENED,
-  AuditEvent.ATTACHMENT_UPLOADED
+  AuditEvent.ATTACHMENT_UPLOADED,
 ]);
 
 export const AuditResource = {

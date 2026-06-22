@@ -36,6 +36,7 @@ import { KnowledgeCapsuleRepo } from '@docmost/db/repos/llm-wiki/knowledge-capsu
 import { KnowledgeAccessPolicyRepo } from '@docmost/db/repos/llm-wiki/knowledge-access-policy.repo';
 import { KnowledgeQueryAuditRepo } from '@docmost/db/repos/llm-wiki/knowledge-query-audit.repo';
 import { KnowledgeQuarantineRepo } from '@docmost/db/repos/llm-wiki/knowledge-quarantine.repo';
+import { KnowledgeReviewSnapshotRepo } from '@docmost/db/repos/llm-wiki/knowledge-review-snapshot.repo';
 import { AiChatRepo } from '@docmost/db/repos/ai-chat/ai-chat.repo';
 
 @Global()
@@ -102,6 +103,7 @@ import { AiChatRepo } from '@docmost/db/repos/ai-chat/ai-chat.repo';
     KnowledgeCapsuleRepo,
     KnowledgeAccessPolicyRepo,
     KnowledgeQueryAuditRepo,
+    KnowledgeReviewSnapshotRepo,
     KnowledgeQuarantineRepo,
     AiChatRepo,
     PageListener,
@@ -133,6 +135,7 @@ import { AiChatRepo } from '@docmost/db/repos/ai-chat/ai-chat.repo';
     KnowledgeCapsuleRepo,
     KnowledgeAccessPolicyRepo,
     KnowledgeQueryAuditRepo,
+    KnowledgeReviewSnapshotRepo,
     KnowledgeQuarantineRepo,
     AiChatRepo,
   ],

@@ -3,13 +3,18 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from "kysely";
+import type { ColumnType } from 'kysely';
 
-export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S, I | undefined, U>
-  : ColumnType<T, T | undefined, T>;
+export type Generated<T> =
+  T extends ColumnType<infer S, infer I, infer U>
+    ? ColumnType<S, I | undefined, U>
+    : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+export type Int8 = ColumnType<
+  string,
+  bigint | number | string,
+  bigint | number | string
+>;
 
 export type Json = JsonValue;
 
@@ -394,6 +399,18 @@ export interface KnowledgeQueryAudit {
   queryHash: string;
   retrievalMode: string;
   userId: string | null;
+  workspaceId: string;
+}
+
+export interface KnowledgeReviewSnapshots {
+  discoveredAt: Generated<Timestamp>;
+  docs: Json;
+  id: Generated<string>;
+  items: Json;
+  resolvedReviews: Json;
+  spaceId: string;
+  updatedAt: Generated<Timestamp>;
+  version: string;
   workspaceId: string;
 }
 
@@ -829,6 +846,7 @@ export interface DB {
   knowledgePages: KnowledgePages;
   knowledgePageSources: KnowledgePageSources;
   knowledgeQueryAudit: KnowledgeQueryAudit;
+  knowledgeReviewSnapshots: KnowledgeReviewSnapshots;
   knowledgeQuarantinedArtifacts: KnowledgeQuarantinedArtifacts;
   knowledgeSourceAccessPolicy: KnowledgeSourceAccessPolicy;
   knowledgeSourceAccessPrincipals: KnowledgeSourceAccessPrincipals;
