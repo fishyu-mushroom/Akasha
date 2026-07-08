@@ -5,22 +5,22 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 import { GroupService } from './group.service';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
 import { InjectKysely } from 'nestjs-kysely';
-import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
-import { executeTx } from '@docmost/db/utils';
-import { WatcherRepo } from '@docmost/db/repos/watcher/watcher.repo';
-import { FavoriteRepo } from '@docmost/db/repos/favorite/favorite.repo';
+import { GroupUserRepo } from '@akasha/db/repos/group/group-user.repo';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
+import { UserRepo } from '@akasha/db/repos/user/user.repo';
+import { executeTx } from '@akasha/db/utils';
+import { WatcherRepo } from '@akasha/db/repos/watcher/watcher.repo';
+import { FavoriteRepo } from '@akasha/db/repos/favorite/favorite.repo';
 import { AuditEvent, AuditResource } from '../../../common/events/audit-events';
 import {
   AUDIT_SERVICE,
   IAuditService,
 } from '../../../integrations/audit/audit.service';
-import { dbOrTx } from '@docmost/db/utils';
+import { dbOrTx } from '@akasha/db/utils';
 
 @Injectable()
 export class GroupUserService {

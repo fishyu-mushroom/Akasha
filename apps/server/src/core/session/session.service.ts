@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { TokenService } from '../auth/services/token.service';
-import { UserSessionRepo } from '@docmost/db/repos/session/user-session.repo';
+import { UserSessionRepo } from '@akasha/db/repos/session/user-session.repo';
 import { EnvironmentService } from '../../integrations/environment/environment.service';
-import { User } from '@docmost/db/types/entity.types';
+import { User } from '@akasha/db/types/entity.types';
 import { ClsService } from 'nestjs-cls';
 import {
   AuditContext,

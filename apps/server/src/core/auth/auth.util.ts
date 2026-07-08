@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { Workspace } from '@docmost/db/types/entity.types';
+import { Workspace } from '@akasha/db/types/entity.types';
 import { createHmac } from 'node:crypto';
 
 export function computeEmailSignature(

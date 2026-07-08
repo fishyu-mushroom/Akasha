@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { KnowledgeChunk, KnowledgePage } from '@docmost/db/types/entity.types';
+import { KnowledgeChunk, KnowledgePage } from '@akasha/db/types/entity.types';
 import { KnowledgeSourceRange } from '../types/knowledge.types';
 import {
   KNOWLEDGE_COMPLETENESS_NOTICE,

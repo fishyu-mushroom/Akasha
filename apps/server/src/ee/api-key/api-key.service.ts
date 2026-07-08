@@ -6,13 +6,13 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ApiKeyRepo } from '@docmost/db/repos/api-key/api-key.repo';
+import { ApiKeyRepo } from '@akasha/db/repos/api-key/api-key.repo';
 import { TokenService } from '../../core/auth/services/token.service';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
-import { WorkspaceRepo } from '@docmost/db/repos/workspace/workspace.repo';
+import { UserRepo } from '@akasha/db/repos/user/user.repo';
+import { WorkspaceRepo } from '@akasha/db/repos/workspace/workspace.repo';
 import { JwtApiKeyPayload } from '../../core/auth/dto/jwt-payload';
 import { UserRole } from '../../common/helpers/types/permission';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 
 @Injectable()
 export class ApiKeyService {

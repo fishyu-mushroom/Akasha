@@ -1,7 +1,7 @@
-import { KnowledgeCapsuleRepo } from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
-import { KnowledgeAccessPolicyRepo } from '@docmost/db/repos/llm-wiki/knowledge-access-policy.repo';
-import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
+import { KnowledgeCapsuleRepo } from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
+import { KnowledgeAccessPolicyRepo } from '@akasha/db/repos/llm-wiki/knowledge-access-policy.repo';
+import { GroupUserRepo } from '@akasha/db/repos/group/group-user.repo';
+import { UserRepo } from '@akasha/db/repos/user/user.repo';
 import { UserRole } from '../../../common/helpers/types/permission';
 import { SpaceAuthorizationService } from '../../../core/space/services/space-authorization.service';
 import {

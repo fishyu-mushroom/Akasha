@@ -4,9 +4,9 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { join } from 'path';
 import * as fs from 'node:fs';
 import { validate as isValidUUID } from 'uuid';
-import { WorkspaceRepo } from '@docmost/db/repos/workspace/workspace.repo';
+import { WorkspaceRepo } from '@akasha/db/repos/workspace/workspace.repo';
 import { EnvironmentService } from '../../integrations/environment/environment.service';
-import { Workspace } from '@docmost/db/types/entity.types';
+import { Workspace } from '@akasha/db/types/entity.types';
 import { htmlEscape } from '../../common/helpers/html-escaper';
 
 @Controller('share')

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { KnowledgeAccessPolicyRepo } from '@docmost/db/repos/llm-wiki/knowledge-access-policy.repo';
-import { KnowledgeSourceRepo } from '@docmost/db/repos/llm-wiki/knowledge-source.repo';
+import { KnowledgeAccessPolicyRepo } from '@akasha/db/repos/llm-wiki/knowledge-access-policy.repo';
+import { KnowledgeSourceRepo } from '@akasha/db/repos/llm-wiki/knowledge-source.repo';
 import { KnowledgeAccessIndexerService } from './knowledge-access-indexer.service';
 
 export type KnowledgeAccessRepairResult = {

@@ -2,8 +2,8 @@ services:
   db:
     image: postgres:18
     environment:
-      POSTGRES_DB: docmost
-      POSTGRES_USER: docmost
+      POSTGRES_DB: akasha
+      POSTGRES_USER: akasha
       POSTGRES_PASSWORD: STRONG_DB_PASSWORD
     restart: unless-stopped
     ports:

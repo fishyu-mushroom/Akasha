@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { JsonValue } from '@docmost/db/types/db';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { JsonValue } from '@akasha/db/types/db';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 
 export type KnowledgeQueryAuditMetadata = {
   spaceIds: string[];

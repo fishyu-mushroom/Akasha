@@ -1,4 +1,4 @@
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
 import { KnowledgeSourceExporterService } from './knowledge-source-exporter.service';
 
 describe('KnowledgeSourceExporterService', () => {

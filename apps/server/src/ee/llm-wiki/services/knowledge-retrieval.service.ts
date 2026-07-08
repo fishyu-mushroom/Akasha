@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
-import { KnowledgeAccessPolicyRepo } from '@docmost/db/repos/llm-wiki/knowledge-access-policy.repo';
+import { GroupUserRepo } from '@akasha/db/repos/group/group-user.repo';
+import { KnowledgeAccessPolicyRepo } from '@akasha/db/repos/llm-wiki/knowledge-access-policy.repo';
 import {
   KnowledgeCapsuleRepo,
   KnowledgeRetrievalSignal,
-} from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
-import { KnowledgeChunk, KnowledgePage } from '@docmost/db/types/entity.types';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
+} from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
+import { KnowledgeChunk, KnowledgePage } from '@akasha/db/types/entity.types';
+import { UserRepo } from '@akasha/db/repos/user/user.repo';
 import { SpaceAuthorizationService } from '../../../core/space/services/space-authorization.service';
 import { ConfiguredKnowledgeEmbeddingProvider } from './knowledge-embedding-provider.service';
 import {

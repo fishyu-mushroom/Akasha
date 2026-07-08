@@ -1,25 +1,25 @@
 services:
-  docmost:
-    image: docmost/docmost:latest
+  akasha:
+    image: akasha/akasha:latest
     depends_on:
       - db
       - redis
     environment:
       APP_URL: 'http://localhost:3000'
       APP_SECRET: 'REPLACE_WITH_LONG_SECRET'
-      DATABASE_URL: 'postgresql://docmost:STRONG_DB_PASSWORD@db:5432/docmost'
+      DATABASE_URL: 'postgresql://akasha:STRONG_DB_PASSWORD@db:5432/akasha'
       REDIS_URL: 'redis://redis:6379'
     ports:
       - "3000:3000"
     restart: unless-stopped
     volumes:
-      - docmost:/app/data/storage
+      - akasha:/app/data/storage
 
   db:
     image: postgres:18
     environment:
-      POSTGRES_DB: docmost
-      POSTGRES_USER: docmost
+      POSTGRES_DB: akasha
+      POSTGRES_USER: akasha
       POSTGRES_PASSWORD: STRONG_DB_PASSWORD
     restart: unless-stopped
     volumes:
@@ -33,6 +33,6 @@ services:
       - redis_data:/data
 
 volumes:
-  docmost:
+  akasha:
   db_data:
   redis_data:

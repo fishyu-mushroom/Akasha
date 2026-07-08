@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
+import { UserRepo } from '@akasha/db/repos/user/user.repo';
 import { UserRole } from '../../../common/helpers/types/permission';
 import { SpaceAuthorizationService } from '../../../core/space/services/space-authorization.service';
 

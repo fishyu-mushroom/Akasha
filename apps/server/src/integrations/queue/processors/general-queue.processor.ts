@@ -7,13 +7,13 @@ import {
   IPageBacklinkJob,
 } from '../constants/queue.interface';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { BacklinkRepo } from '@docmost/db/repos/backlink/backlink.repo';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
+import { BacklinkRepo } from '@akasha/db/repos/backlink/backlink.repo';
 import {
   WatcherRepo,
   WatcherType,
-} from '@docmost/db/repos/watcher/watcher.repo';
-import { InsertableWatcher } from '@docmost/db/types/entity.types';
+} from '@akasha/db/repos/watcher/watcher.repo';
+import { InsertableWatcher } from '@akasha/db/types/entity.types';
 import { processBacklinks } from '../tasks/backlinks.task';
 
 @Processor(QueueName.GENERAL_QUEUE)

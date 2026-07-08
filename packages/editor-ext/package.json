@@ -1,6 +1,6 @@
 {
-  "name": "@docmost/editor-ext",
-  "homepage": "https://docmost.com",
+  "name": "@akasha/editor-ext",
+  "homepage": "https://akasha.com",
   "private": true,
   "scripts": {
     "build": "tsc --build",

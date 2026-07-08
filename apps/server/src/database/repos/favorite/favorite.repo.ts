@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { InsertableFavorite, Favorite } from '@docmost/db/types/entity.types';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
+import { InsertableFavorite, Favorite } from '@akasha/db/types/entity.types';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
+import { executeWithCursorPagination } from '@akasha/db/pagination/cursor-pagination';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
 import { ExpressionBuilder, SelectQueryBuilder, sql } from 'kysely';
-import { DB } from '@docmost/db/types/db';
-import { dbOrTx } from '@docmost/db/utils';
+import { DB } from '@akasha/db/types/db';
+import { dbOrTx } from '@akasha/db/utils';
 
 export const FavoriteType = {
   PAGE: 'page',

@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
 import { InjectKysely } from 'nestjs-kysely';
-import { executeTx } from '@docmost/db/utils';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { executeTx } from '@akasha/db/utils';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 import {
   KnowledgeCapsuleRepo,
   UpsertCompiledArtifactInput,
-} from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
-import { KnowledgeQuarantineRepo } from '@docmost/db/repos/llm-wiki/knowledge-quarantine.repo';
-import { KnowledgeSourceRepo } from '@docmost/db/repos/llm-wiki/knowledge-source.repo';
+} from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
+import { KnowledgeQuarantineRepo } from '@akasha/db/repos/llm-wiki/knowledge-quarantine.repo';
+import { KnowledgeSourceRepo } from '@akasha/db/repos/llm-wiki/knowledge-source.repo';
 import {
   CompiledKnowledgeArtifact,
   CompileSpaceInput,

@@ -1,10 +1,10 @@
-import { KnowledgeCapsuleRepo } from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
+import { KnowledgeCapsuleRepo } from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
 import {
   KnowledgeClaim,
   KnowledgeLink,
   KnowledgePage,
   KnowledgePageSource,
-} from '@docmost/db/types/entity.types';
+} from '@akasha/db/types/entity.types';
 import {
   Claim,
   OutLink,

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as mammoth from 'mammoth';
 import { v7 as uuid7 } from 'uuid';
-import { AttachmentRepo } from '@docmost/db/repos/attachment/attachment.repo';
+import { AttachmentRepo } from '@akasha/db/repos/attachment/attachment.repo';
 import { StorageService } from '../../integrations/storage/storage.service';
 import { AttachmentType } from '../../core/attachment/attachment.constants';
 import { getAttachmentFolderPath } from '../../core/attachment/attachment.utils';

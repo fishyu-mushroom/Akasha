@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { CreateShareDto, ShareInfoDto, UpdateShareDto } from './dto/share.dto';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 import { nanoIdGen } from '../../common/helpers';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
 import { TokenService } from '../auth/services/token.service';
 import { jsonToNode } from '../../collaboration/collaboration.util';
 import {
@@ -18,10 +18,10 @@ import {
   removeMarkTypeFromDoc,
 } from '../../common/helpers/prosemirror/utils';
 import { Node } from '@tiptap/pm/model';
-import { ShareRepo } from '@docmost/db/repos/share/share.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
+import { ShareRepo } from '@akasha/db/repos/share/share.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
 import { updateAttachmentAttr } from './share.util';
-import { Page } from '@docmost/db/types/entity.types';
+import { Page } from '@akasha/db/types/entity.types';
 import { validate as isValidUUID } from 'uuid';
 import { sql } from 'kysely';
 import { TransclusionService } from '../page/transclusion/transclusion.service';

@@ -10,7 +10,7 @@ import { LdapLoginModal } from "@/ee/components/ldap-login-modal.tsx";
 import { getRedirectParam } from "@/lib/app-route.ts";
 import useCurrentUser from "@/features/user/hooks/use-current-user.ts";
 
-const SSO_AUTO_ATTEMPT_KEY = "docmost:ssoAutoAttempt";
+const SSO_AUTO_ATTEMPT_KEY = "akasha:ssoAutoAttempt";
 const SSO_AUTO_ATTEMPT_TTL_MS = 5 * 60_000;
 
 function recentAutoAttempt(): boolean {

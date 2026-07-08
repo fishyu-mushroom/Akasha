@@ -13,8 +13,8 @@ import {
 import { InjectQueue } from '@nestjs/bullmq';
 import { createHash } from 'crypto';
 import { Queue } from 'bullmq';
-import { User, Workspace } from '@docmost/db/types/entity.types';
-import { KnowledgeQueryAuditRepo } from '@docmost/db/repos/llm-wiki/knowledge-query-audit.repo';
+import { User, Workspace } from '@akasha/db/types/entity.types';
+import { KnowledgeQueryAuditRepo } from '@akasha/db/repos/llm-wiki/knowledge-query-audit.repo';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
 import { AuditEvent, AuditResource } from '../../common/events/audit-events';

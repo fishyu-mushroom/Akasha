@@ -44,7 +44,7 @@ import {
   htmlToMarkdown,
   TransclusionSource,
   TransclusionReference,
-} from '@docmost/editor-ext';
+} from '@akasha/editor-ext';
 import { generateText, getSchema, JSONContent } from '@tiptap/core';
 import { generateHTML, generateJSON } from '../common/helpers/prosemirror/html';
 // @tiptap/html library works best for generating prosemirror json state but not HTML

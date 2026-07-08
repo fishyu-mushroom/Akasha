@@ -6,10 +6,10 @@ import {
   WorkerHost,
 } from '@nestjs/bullmq';
 import { Job, Queue } from 'bullmq';
-import { KnowledgeCapsuleRepo } from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
-import { KnowledgeReviewApplicationRepo } from '@docmost/db/repos/llm-wiki/knowledge-review-application.repo';
-import { KnowledgeSourceRepo } from '@docmost/db/repos/llm-wiki/knowledge-source.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { KnowledgeCapsuleRepo } from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
+import { KnowledgeReviewApplicationRepo } from '@akasha/db/repos/llm-wiki/knowledge-review-application.repo';
+import { KnowledgeSourceRepo } from '@akasha/db/repos/llm-wiki/knowledge-source.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
 import { QueueJob, QueueName } from '../../../integrations/queue/constants';
 import {
   DEFAULT_KNOWLEDGE_COMPILER_VERSION,

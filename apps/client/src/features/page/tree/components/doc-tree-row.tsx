@@ -80,7 +80,7 @@ function DocTreeRowInner<T extends object>(props: Props<T>) {
 
   const isOpen = openIds.has(node.id);
   // "Has children" includes both already-loaded children AND the consumer's
-  // own server-side flag (`hasChildren` is a docmost convention on
+  // own server-side flag (`hasChildren` is a akasha convention on
   // SpaceTreeNode / SharedPageTreeNode). The flag lets the chevron and the
   // auto-expand timer recognize unloaded subtrees so the consumer's lazy-load
   // (via onToggle) can populate them on demand.

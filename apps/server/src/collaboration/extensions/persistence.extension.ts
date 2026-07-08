@@ -9,10 +9,10 @@ import * as Y from 'yjs';
 import { Injectable, Logger } from '@nestjs/common';
 import { TiptapTransformer } from '@hocuspocus/transformer';
 import { getPageId, jsonToText, tiptapExtensions } from '../collaboration.util';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { executeTx } from '@docmost/db/utils';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
+import { executeTx } from '@akasha/db/utils';
 import { InjectQueue } from '@nestjs/bullmq';
 import { QueueJob, QueueName } from '../../integrations/queue/constants';
 import { Queue } from 'bullmq';
@@ -25,7 +25,7 @@ import {
   IPageHistoryJob,
   IPageMentionNotificationJob,
 } from '../../integrations/queue/constants/queue.interface';
-import { Page } from '@docmost/db/types/entity.types';
+import { Page } from '@akasha/db/types/entity.types';
 import { CollabHistoryService } from '../services/collab-history.service';
 import {
   HISTORY_FAST_INTERVAL,

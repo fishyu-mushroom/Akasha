@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { Server, Socket } from 'socket.io';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
 import {
   TREE_EVENTS,
   WS_SPACE_RESTRICTION_CACHE_PREFIX,

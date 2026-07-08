@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 import {
   IApprovalRejectedNotificationJob,
   IApprovalRequestedNotificationJob,
@@ -10,13 +10,13 @@ import {
 } from '../../../integrations/queue/constants/queue.interface';
 import { NotificationService } from '../notification.service';
 import { NotificationType } from '../notification.constants';
-import { VerificationExpiringEmail } from '@docmost/transactional/emails/verification-expiring-email';
-import { VerificationExpiredEmail } from '@docmost/transactional/emails/verification-expired-email';
-import { ApprovalRequestedEmail } from '@docmost/transactional/emails/approval-requested-email';
-import { ApprovalRejectedEmail } from '@docmost/transactional/emails/approval-rejected-email';
+import { VerificationExpiringEmail } from '@akasha/transactional/emails/verification-expiring-email';
+import { VerificationExpiredEmail } from '@akasha/transactional/emails/verification-expired-email';
+import { ApprovalRequestedEmail } from '@akasha/transactional/emails/approval-requested-email';
+import { ApprovalRejectedEmail } from '@akasha/transactional/emails/approval-rejected-email';
 import { getPageTitle } from '../../../common/helpers';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
 
 @Injectable()
 export class VerificationNotificationService {

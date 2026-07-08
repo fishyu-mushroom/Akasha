@@ -24,7 +24,7 @@ vi.mock("react-i18next", () => ({
 }));
 
 vi.mock("@/lib/config", () => ({
-  getAppName: () => "Docmost",
+  getAppName: () => "Akasha",
 }));
 
 vi.mock("@/features/space/queries/space-query", () => ({

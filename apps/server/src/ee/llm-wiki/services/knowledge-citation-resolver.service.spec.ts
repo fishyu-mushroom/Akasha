@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
-import { KnowledgeCapsuleRepo } from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { KnowledgeCapsuleRepo } from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
 import { KnowledgeSourceAuthorizationService } from './knowledge-source-authorization.service';
 import { KnowledgeCitationResolverService } from './knowledge-citation-resolver.service';
 

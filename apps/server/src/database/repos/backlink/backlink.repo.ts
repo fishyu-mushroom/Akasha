@@ -2,17 +2,17 @@ import {
   Backlink,
   InsertableBacklink,
   UpdatableBacklink,
-} from '@docmost/db/types/entity.types';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { dbOrTx } from '@docmost/db/utils';
+} from '@akasha/db/types/entity.types';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
+import { dbOrTx } from '@akasha/db/utils';
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 import {
   executeWithCursorPagination,
   emptyCursorPaginationResult,
-} from '@docmost/db/pagination/cursor-pagination';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
+} from '@akasha/db/pagination/cursor-pagination';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
 
 @Injectable()

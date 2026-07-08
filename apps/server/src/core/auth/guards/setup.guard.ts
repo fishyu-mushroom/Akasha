@@ -1,5 +1,5 @@
 import { CanActivate, ForbiddenException, Injectable } from '@nestjs/common';
-import { WorkspaceRepo } from '@docmost/db/repos/workspace/workspace.repo';
+import { WorkspaceRepo } from '@akasha/db/repos/workspace/workspace.repo';
 import { EnvironmentService } from '../../../integrations/environment/environment.service';
 
 @Injectable()

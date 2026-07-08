@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { NotificationRepo } from '@docmost/db/repos/notification/notification.repo';
-import { InsertableNotification } from '@docmost/db/types/entity.types';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
+import { NotificationRepo } from '@akasha/db/repos/notification/notification.repo';
+import { InsertableNotification } from '@akasha/db/types/entity.types';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 import { WsGateway } from '../../ws/ws.gateway';
 import { MailService } from '../../integrations/mail/mail.service';
 import { NotificationTab, NotificationType, NotificationTypeToSettingKey } from './notification.constants';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
 
 @Injectable()
 export class NotificationService {

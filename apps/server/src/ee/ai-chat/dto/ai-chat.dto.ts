@@ -5,7 +5,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 
 export class SendAiChatMessageDto {
   @IsOptional()

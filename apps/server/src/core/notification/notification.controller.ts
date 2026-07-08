@@ -9,7 +9,7 @@ import {
 import { NotificationService } from './notification.service';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { User } from '@docmost/db/types/entity.types';
+import { User } from '@akasha/db/types/entity.types';
 import { ListNotificationsDto, MarkNotificationsReadDto } from './dto/notification.dto';
 
 @UseGuards(JwtAuthGuard)

@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { AuthUser } from '../../../common/decorators/auth-user.decorator';
-import { User } from '@docmost/db/types/entity.types';
+import { User } from '@akasha/db/types/entity.types';
 import { TransclusionService } from './transclusion.service';
 import { LookupDto } from './dto/lookup.dto';
 import { ReferencesDto } from './dto/references.dto';

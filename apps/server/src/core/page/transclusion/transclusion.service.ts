@@ -7,13 +7,13 @@ import {
 import { isDeepStrictEqual } from 'node:util';
 import { v7 as uuid7 } from 'uuid';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { PageTransclusionsRepo } from '@docmost/db/repos/page-transclusions/page-transclusions.repo';
-import { PageTransclusionReferencesRepo } from '@docmost/db/repos/page-transclusions/page-transclusion-references.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { AttachmentRepo } from '@docmost/db/repos/attachment/attachment.repo';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
+import { PageTransclusionsRepo } from '@akasha/db/repos/page-transclusions/page-transclusions.repo';
+import { PageTransclusionReferencesRepo } from '@akasha/db/repos/page-transclusions/page-transclusion-references.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
+import { AttachmentRepo } from '@akasha/db/repos/attachment/attachment.repo';
 import { StorageService } from '../../../integrations/storage/storage.service';
 import {
   collectReferencesFromPmJson,
@@ -21,7 +21,7 @@ import {
 } from './utils/transclusion-prosemirror.util';
 import { rewriteAttachmentsForUnsync } from './utils/transclusion-unsync.util';
 import { TransclusionLookup } from './transclusion.types';
-import { Page, User } from '@docmost/db/types/entity.types';
+import { Page, User } from '@akasha/db/types/entity.types';
 import { PageAccessService } from '../page-access/page-access.service';
 
 type ReferencingPageInfo = {

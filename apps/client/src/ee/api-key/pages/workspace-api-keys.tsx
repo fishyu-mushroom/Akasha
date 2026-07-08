@@ -59,7 +59,7 @@ export default function WorkspaceApiKeys() {
         <Trans
           i18nKey="Manage API keys for all users in the workspace. View the <anchor>API documentation</anchor> for usage details."
           components={{
-            anchor: <Anchor href="https://docmost.com/api-docs" target="_blank" size="sm" />,
+            anchor: <Anchor href="https://akasha.com/api-docs" target="_blank" size="sm" />,
           }}
         />
       </Text>

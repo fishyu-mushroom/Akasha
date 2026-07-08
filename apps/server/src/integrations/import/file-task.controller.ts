@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import SpaceAbilityFactory from '../../core/casl/abilities/space-ability.factory';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { User, Workspace } from '@akasha/db/types/entity.types';
 import {
   SpaceCaslAction,
   SpaceCaslSubject,
@@ -22,12 +22,12 @@ import {
 import WorkspaceAbilityFactory from '../../core/casl/abilities/workspace-ability.factory';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { FileTaskIdDto } from './dto/file-task-dto';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
+import { executeWithCursorPagination } from '@akasha/db/pagination/cursor-pagination';
 
 @Controller('file-tasks')
 export class FileTaskController {

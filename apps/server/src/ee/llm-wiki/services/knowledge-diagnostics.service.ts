@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { InjectKysely } from 'nestjs-kysely';
 import { Job, JobState, Queue } from 'bullmq';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 import {
   KnowledgeQueryAuditRepo,
   KnowledgeRetrievalAuditSummary,
-} from '@docmost/db/repos/llm-wiki/knowledge-query-audit.repo';
+} from '@akasha/db/repos/llm-wiki/knowledge-query-audit.repo';
 import {
   KnowledgeQuarantineRepo,
   KnowledgeQuarantinedArtifactDiagnostic,
-} from '@docmost/db/repos/llm-wiki/knowledge-quarantine.repo';
+} from '@akasha/db/repos/llm-wiki/knowledge-quarantine.repo';
 import { QueueJob, QueueName } from '../../../integrations/queue/constants';
 import { KnowledgeCompileJobResult } from '../types/knowledge-queue.types';
 import {

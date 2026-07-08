@@ -6,14 +6,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
-import { KnowledgeReviewApplicationRepo } from '@docmost/db/repos/llm-wiki/knowledge-review-application.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { JsonObject, JsonValue } from '@docmost/db/types/db';
+import { KnowledgeReviewApplicationRepo } from '@akasha/db/repos/llm-wiki/knowledge-review-application.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
+import { JsonObject, JsonValue } from '@akasha/db/types/db';
 import {
   KnowledgeReviewApplication as KnowledgeReviewApplicationRow,
   Page,
   User,
-} from '@docmost/db/types/entity.types';
+} from '@akasha/db/types/entity.types';
 import { jsonToMarkdown } from '../../../collaboration/collaboration.util';
 import SpaceAbilityFactory from '../../../core/casl/abilities/space-ability.factory';
 import {

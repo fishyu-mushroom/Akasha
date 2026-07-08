@@ -7,24 +7,24 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { LicenseCheckService } from '../../../integrations/environment/license-check.service';
-import { UserSessionRepo } from '@docmost/db/repos/session/user-session.repo';
+import { UserSessionRepo } from '@akasha/db/repos/session/user-session.repo';
 import { CreateWorkspaceDto } from '../dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from '../dto/update-workspace.dto';
 import { SpaceService } from '../../space/services/space.service';
 import { CreateSpaceDto } from '../../space/dto/create-space.dto';
 import { SpaceRole, UserRole } from '../../../common/helpers/types/permission';
 import { SpaceMemberService } from '../../space/services/space-member.service';
-import { WorkspaceRepo } from '@docmost/db/repos/workspace/workspace.repo';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { executeTx } from '@docmost/db/utils';
+import { WorkspaceRepo } from '@akasha/db/repos/workspace/workspace.repo';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
+import { executeTx } from '@akasha/db/utils';
 import { InjectKysely } from 'nestjs-kysely';
 import { Feature } from '../../../common/features';
-import { User } from '@docmost/db/types/entity.types';
-import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
-import { GroupRepo } from '@docmost/db/repos/group/group.repo';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { User } from '@akasha/db/types/entity.types';
+import { GroupUserRepo } from '@akasha/db/repos/group/group-user.repo';
+import { GroupRepo } from '@akasha/db/repos/group/group.repo';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 import { UpdateWorkspaceUserRoleDto } from '../dto/update-workspace-user-role.dto';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
+import { UserRepo } from '@akasha/db/repos/user/user.repo';
 import { EnvironmentService } from '../../../integrations/environment/environment.service';
 import { DomainService } from '../../../integrations/environment/domain.service';
 import { jsonArrayFrom } from 'kysely/helpers/postgres';
@@ -39,11 +39,11 @@ import {
   generateRandomSuffixNumbers,
   diffAuditTrackedFields,
 } from '../../../common/helpers';
-import { isPageEmbeddingsTableExists } from '@docmost/db/helpers/helpers';
-import { CursorPaginationResult } from '@docmost/db/pagination/cursor-pagination';
-import { ShareRepo } from '@docmost/db/repos/share/share.repo';
-import { WatcherRepo } from '@docmost/db/repos/watcher/watcher.repo';
-import { FavoriteRepo } from '@docmost/db/repos/favorite/favorite.repo';
+import { isPageEmbeddingsTableExists } from '@akasha/db/helpers/helpers';
+import { CursorPaginationResult } from '@akasha/db/pagination/cursor-pagination';
+import { ShareRepo } from '@akasha/db/repos/share/share.repo';
+import { WatcherRepo } from '@akasha/db/repos/watcher/watcher.repo';
+import { FavoriteRepo } from '@akasha/db/repos/favorite/favorite.repo';
 import { AuditEvent, AuditResource } from '../../../common/events/audit-events';
 import {
   AUDIT_SERVICE,
@@ -825,7 +825,7 @@ export class WorkspaceService {
       await this.userRepo.updateUser(
         {
           name: 'Deleted user',
-          email: v4() + '@deleted.docmost.com',
+          email: v4() + '@deleted.akasha.com',
           avatarUrl: null,
           settings: null,
           deletedAt: new Date(),

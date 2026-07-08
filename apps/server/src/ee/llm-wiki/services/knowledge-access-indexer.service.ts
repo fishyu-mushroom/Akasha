@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
-import { KnowledgeAccessPolicyRepo } from '@docmost/db/repos/llm-wiki/knowledge-access-policy.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { SourcePageRestrictedAncestorRequirements } from '@docmost/db/repos/page/types/page-permission.types';
+import { KnowledgeAccessPolicyRepo } from '@akasha/db/repos/llm-wiki/knowledge-access-policy.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
+import { SourcePageRestrictedAncestorRequirements } from '@akasha/db/repos/page/types/page-permission.types';
 
 type IndexedRequirement = {
   requirementId: string;

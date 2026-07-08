@@ -58,7 +58,7 @@ jobs:
         with:
           context: .
           platforms: ${{ matrix.platform }}
-          outputs: type=image,name=docmost/docmost,push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=akasha/akasha,push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha,scope=${{ matrix.suffix }}
           cache-to: type=gha,scope=${{ matrix.suffix }},mode=max
 
@@ -86,19 +86,19 @@ jobs:
           platforms: ${{ matrix.platform }}
           push: false
           tags: |
-            docmost/docmost:latest
-            docmost/docmost:${{ steps.strip-v.outputs.version }}
-          outputs: type=docker,dest=docmost-${{ matrix.suffix }}.docker.tar
+            akasha/akasha:latest
+            akasha/akasha:${{ steps.strip-v.outputs.version }}
+          outputs: type=docker,dest=akasha-${{ matrix.suffix }}.docker.tar
           cache-from: type=gha,scope=${{ matrix.suffix }}
 
       - name: Compress image
-        run: gzip docmost-${{ matrix.suffix }}.docker.tar
+        run: gzip akasha-${{ matrix.suffix }}.docker.tar
 
       - name: Upload image archive
         uses: actions/upload-artifact@v4
         with:
           name: docker-image-${{ matrix.suffix }}
-          path: docmost-${{ matrix.suffix }}.docker.tar.gz
+          path: akasha-${{ matrix.suffix }}.docker.tar.gz
           if-no-files-found: error
 
   release:
@@ -125,7 +125,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: docmost/docmost
+          images: akasha/akasha
           tags: |
             type=semver,pattern={{version}},value=${{ env.VERSION }}
             type=semver,pattern={{major}}.{{minor}},value=${{ env.VERSION }},enable=${{ !contains(env.VERSION, '-') }}
@@ -135,7 +135,7 @@ jobs:
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf 'docmost/docmost@sha256:%s ' *)
+            $(printf 'akasha/akasha@sha256:%s ' *)
 
       - name: Download image archives
         uses: actions/download-artifact@v4
@@ -149,6 +149,6 @@ jobs:
         with:
           tag_name: ${{ env.VERSION }}
           files: |
-            /tmp/images/docmost-amd64.docker.tar.gz
-            /tmp/images/docmost-arm64.docker.tar.gz
+            /tmp/images/akasha-amd64.docker.tar.gz
+            /tmp/images/akasha-arm64.docker.tar.gz
           draft: true

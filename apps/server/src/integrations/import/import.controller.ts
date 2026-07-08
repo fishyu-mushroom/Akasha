@@ -14,7 +14,7 @@ import {
 import SpaceAbilityFactory from '../../core/casl/abilities/space-ability.factory';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { User, Workspace } from '@akasha/db/types/entity.types';
 import {
   SpaceCaslAction,
   SpaceCaslSubject,

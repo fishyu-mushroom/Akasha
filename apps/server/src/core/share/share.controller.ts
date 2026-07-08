@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { User, Workspace } from '@akasha/db/types/entity.types';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
 import { ShareService } from './share.service';
 import {
@@ -22,13 +22,13 @@ import {
   UpdateShareDto,
 } from './dto/share.dto';
 import { ShareTransclusionLookupDto } from './dto/share-transclusion-lookup.dto';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
 import { PageAccessService } from '../page/page-access/page-access.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
-import { ShareRepo } from '@docmost/db/repos/share/share.repo';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { ShareRepo } from '@akasha/db/repos/share/share.repo';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 import { LicenseCheckService } from '../../integrations/environment/license-check.service';
 import { AuditEvent, AuditResource } from '../../common/events/audit-events';
 import {

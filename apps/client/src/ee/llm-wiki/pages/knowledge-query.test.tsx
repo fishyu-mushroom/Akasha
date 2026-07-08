@@ -14,7 +14,7 @@ vi.mock("react-i18next", () => ({
 }));
 
 vi.mock("@/lib/config", () => ({
-  getAppName: () => "Docmost",
+  getAppName: () => "Akasha",
 }));
 
 vi.mock("@mantine/notifications", () => ({

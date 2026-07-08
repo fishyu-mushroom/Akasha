@@ -14,9 +14,9 @@ import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { SpaceIdDto } from './dto/space-id.dto';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 import { SpaceMemberService } from './services/space-member.service';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { User, Workspace } from '@akasha/db/types/entity.types';
 import { AddSpaceMembersDto } from './dto/add-space-members.dto';
 import { RemoveSpaceMemberDto } from './dto/remove-space-member.dto';
 import { UpdateSpaceMemberRoleDto } from './dto/update-space-member-role.dto';
@@ -26,15 +26,15 @@ import {
   SpaceCaslSubject,
 } from '../casl/interfaces/space-ability.type';
 import { UpdateSpaceDto } from './dto/update-space.dto';
-import { findHighestUserSpaceRole } from '@docmost/db/repos/space/utils';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
+import { findHighestUserSpaceRole } from '@akasha/db/repos/space/utils';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
 import {
   WorkspaceCaslAction,
   WorkspaceCaslSubject,
 } from '../casl/interfaces/workspace-ability.type';
 import WorkspaceAbilityFactory from '../casl/abilities/workspace-ability.factory';
 import { CreateSpaceDto } from './dto/create-space.dto';
-import { SpaceRepo } from '@docmost/db/repos/space/space.repo';
+import { SpaceRepo } from '@akasha/db/repos/space/space.repo';
 import { UserRole, SpaceRole } from '../../common/helpers/types/permission';
 
 @UseGuards(JwtAuthGuard)

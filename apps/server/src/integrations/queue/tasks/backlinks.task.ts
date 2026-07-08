@@ -1,8 +1,8 @@
 import { Logger } from '@nestjs/common';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { BacklinkRepo } from '@docmost/db/repos/backlink/backlink.repo';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
+import { BacklinkRepo } from '@akasha/db/repos/backlink/backlink.repo';
 import { IPageBacklinkJob } from '../constants/queue.interface';
-import { executeTx } from '@docmost/db/utils';
+import { executeTx } from '@akasha/db/utils';
 
 const logger = new Logger('BacklinksTask');
 

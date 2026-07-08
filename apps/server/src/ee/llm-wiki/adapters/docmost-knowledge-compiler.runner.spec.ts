@@ -1,4 +1,4 @@
-import { DocmostKnowledgeCompilerRunner } from './docmost-knowledge-compiler.runner';
+import { DocmostKnowledgeCompilerRunner } from './akasha-knowledge-compiler.runner';
 
 describe('DocmostKnowledgeCompilerRunner', () => {
   it('compiles source snapshots into lineage-preserving page capsules and chunks', async () => {
@@ -9,8 +9,8 @@ describe('DocmostKnowledgeCompilerRunner', () => {
     const result = await runner.compileSpace({
       workspaceId: 'workspace-1',
       spaceId: 'space-1',
-      compilerVersion: 'docmost-internal@1',
-      promptVersion: 'docmost-enterprise-kb-v1',
+      compilerVersion: 'akasha-internal@1',
+      promptVersion: 'akasha-enterprise-kb-v1',
       sources: [
         {
           workspaceId: 'workspace-1',
@@ -37,8 +37,8 @@ describe('DocmostKnowledgeCompilerRunner', () => {
           contentHash: 'hash-1',
         },
       ],
-      compilerVersion: 'docmost-internal@1',
-      promptVersion: 'docmost-enterprise-kb-v1',
+      compilerVersion: 'akasha-internal@1',
+      promptVersion: 'akasha-enterprise-kb-v1',
       compilerRunId: 'workspace-1:space-1:2026-06-16T00:00:00.000Z',
       artifacts: [
         expect.objectContaining({
@@ -52,10 +52,10 @@ describe('DocmostKnowledgeCompilerRunner', () => {
             '# 项目架构\n\nChaterm Flutter 使用分层架构。\n\nUI、service、data 模块按职责拆分。',
           sourcePageIds: ['page-1'],
           artifactKind: 'source_summary',
-          compilerVersion: 'docmost-internal@1',
-          promptVersion: 'docmost-enterprise-kb-v1',
+          compilerVersion: 'akasha-internal@1',
+          promptVersion: 'akasha-enterprise-kb-v1',
           compilerRunId: 'workspace-1:space-1:2026-06-16T00:00:00.000Z',
-          compileTaskId: 'docmost-page:page-1',
+          compileTaskId: 'akasha-page:page-1',
           inputSourceRefs: [
             {
               workspaceId: 'workspace-1',
@@ -109,8 +109,8 @@ describe('DocmostKnowledgeCompilerRunner', () => {
     const result = await runner.compileSpace({
       workspaceId: 'workspace-1',
       spaceId: 'space-1',
-      compilerVersion: 'docmost-internal@1',
-      promptVersion: 'docmost-enterprise-kb-v1',
+      compilerVersion: 'akasha-internal@1',
+      promptVersion: 'akasha-enterprise-kb-v1',
       sources: [
         {
           workspaceId: 'workspace-1',
@@ -144,7 +144,7 @@ describe('DocmostKnowledgeCompilerRunner', () => {
         artifactKind: 'overview',
         title: 'Space knowledge overview',
         sourcePageIds: ['page-1', 'page-2'],
-        compileTaskId: 'docmost-overview:space-1',
+        compileTaskId: 'akasha-overview:space-1',
         inputSourceRefs: [
           {
             workspaceId: 'workspace-1',
@@ -219,8 +219,8 @@ describe('DocmostKnowledgeCompilerRunner', () => {
     const result = await runner.compileSpace({
       workspaceId: 'workspace-1',
       spaceId: 'space-1',
-      compilerVersion: 'docmost-internal@1',
-      promptVersion: 'docmost-enterprise-kb-v1',
+      compilerVersion: 'akasha-internal@1',
+      promptVersion: 'akasha-enterprise-kb-v1',
       sources: [
         {
           workspaceId: 'workspace-1',
@@ -253,8 +253,8 @@ describe('DocmostKnowledgeCompilerRunner', () => {
     const result = await runner.compileSpace({
       workspaceId: 'workspace-1',
       spaceId: 'space-1',
-      compilerVersion: 'docmost-internal@1',
-      promptVersion: 'docmost-enterprise-kb-v1',
+      compilerVersion: 'akasha-internal@1',
+      promptVersion: 'akasha-enterprise-kb-v1',
       sources: [
         {
           workspaceId: 'workspace-1',
@@ -302,8 +302,8 @@ describe('DocmostKnowledgeCompilerRunner', () => {
     const result = await runner.compileSpace({
       workspaceId: 'workspace-1',
       spaceId: 'space-1',
-      compilerVersion: 'docmost-internal@1',
-      promptVersion: 'docmost-enterprise-kb-v1',
+      compilerVersion: 'akasha-internal@1',
+      promptVersion: 'akasha-enterprise-kb-v1',
       sources: [
         {
           workspaceId: 'workspace-1',
