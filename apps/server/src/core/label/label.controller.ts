@@ -18,10 +18,10 @@ import {
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { User, Workspace } from '@docmost/db/types/entity.types';
-import { LabelRepo, LabelType } from '@docmost/db/repos/label/label.repo';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { emptyCursorPaginationResult } from '@docmost/db/pagination/cursor-pagination';
+import { User, Workspace } from '@akasha/db/types/entity.types';
+import { LabelRepo, LabelType } from '@akasha/db/repos/label/label.repo';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
+import { emptyCursorPaginationResult } from '@akasha/db/pagination/cursor-pagination';
 import SpaceAbilityFactory from '../casl/abilities/space-ability.factory';
 import {
   SpaceCaslAction,

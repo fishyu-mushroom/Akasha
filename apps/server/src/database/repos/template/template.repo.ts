@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { dbOrTx } from '@docmost/db/utils';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
+import { dbOrTx } from '@akasha/db/utils';
 import {
   InsertableTemplate,
   Page,
   Template,
   UpdatableTemplate,
-} from '@docmost/db/types/entity.types';
+} from '@akasha/db/types/entity.types';
 import { PaginationOptions } from '../../pagination/pagination-options';
-import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
+import { executeWithCursorPagination } from '@akasha/db/pagination/cursor-pagination';
 import { ExpressionBuilder, sql } from 'kysely';
-import { DB } from '@docmost/db/types/db';
+import { DB } from '@akasha/db/types/db';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
 
 @Injectable()

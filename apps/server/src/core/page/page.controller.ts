@@ -29,16 +29,16 @@ import { PageHistoryService } from './services/page-history.service';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { Page, User, Workspace } from '@docmost/db/types/entity.types';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
+import { Page, User, Workspace } from '@akasha/db/types/entity.types';
 import { SidebarPageDto } from './dto/sidebar-page.dto';
 import {
   SpaceCaslAction,
   SpaceCaslSubject,
 } from '../casl/interfaces/space-ability.type';
 import SpaceAbilityFactory from '../casl/abilities/space-ability.factory';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
 import { RecentPageDto } from './dto/recent-page.dto';
 import { CreatedByUserDto } from './dto/created-by-user.dto';
 import { DuplicatePageDto } from './dto/duplicate-page.dto';
@@ -58,8 +58,8 @@ import {
 import { getPageTitle } from '../../common/helpers';
 import { PageAccessLevel, PagePermissionRole, UserRole } from '../../common/helpers/types/permission';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { executeTx } from '@docmost/db/utils';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
+import { executeTx } from '@akasha/db/utils';
 
 @UseGuards(JwtAuthGuard)
 @Controller('pages')

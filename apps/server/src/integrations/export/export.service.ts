@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { jsonToHtml, jsonToNode } from '../../collaboration/collaboration.util';
 import { ExportFormat } from './dto/export-dto';
-import { Page } from '@docmost/db/types/entity.types';
+import { Page } from '@akasha/db/types/entity.types';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 import * as JSZip from 'jszip';
 import { StorageService } from '../storage/storage.service';
 import {
@@ -24,8 +24,8 @@ import {
   ExportMetadata,
   ExportPageMetadata,
 } from '../../common/helpers/types/export-metadata.types';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
 import { Node } from '@tiptap/pm/model';
 import { EditorState } from '@tiptap/pm/state';
 import slugify from '@sindresorhus/slugify';
@@ -37,7 +37,7 @@ import {
   getAttachmentIds,
   getProsemirrorContent,
 } from '../../common/helpers/prosemirror/utils';
-import { htmlToMarkdown } from '@docmost/editor-ext';
+import { htmlToMarkdown } from '@akasha/editor-ext';
 
 type AllowedAttachment = { id: string; fileName: string; filePath: string };
 
@@ -347,12 +347,12 @@ export class ExportService {
 
     const metadata: ExportMetadata = {
       exportedAt: new Date().toISOString(),
-      source: 'docmost',
+      source: 'akasha',
       version: packageJson.version,
       pages: pagesMetadata,
     };
 
-    zip.file('docmost-metadata.json', JSON.stringify(metadata, null, 2));
+    zip.file('akasha-metadata.json', JSON.stringify(metadata, null, 2));
   }
 
   async zipAttachments(

@@ -120,7 +120,7 @@ export class DocmostKnowledgeCompilerRunner implements LlmWikiCompilerRunner {
       compilerVersion: input.input.compilerVersion,
       promptVersion: input.input.promptVersion,
       compilerRunId: input.compilerRunId,
-      compileTaskId: `docmost-page:${input.source.sourcePageId}`,
+      compileTaskId: `akasha-page:${input.source.sourcePageId}`,
       inputSourceRefs: [sourceRef],
       claims: [
         {
@@ -172,7 +172,7 @@ function buildOverviewArtifact(input: {
     compilerVersion: input.input.compilerVersion,
     promptVersion: input.input.promptVersion,
     compilerRunId: input.compilerRunId,
-    compileTaskId: `docmost-overview:${input.input.spaceId}`,
+    compileTaskId: `akasha-overview:${input.input.spaceId}`,
     inputSourceRefs,
     claims: [
       {

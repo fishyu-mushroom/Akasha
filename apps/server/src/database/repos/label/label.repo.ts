@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { KyselyDB, KyselyTransaction } from '../../types/kysely.types';
-import { Label } from '@docmost/db/types/entity.types';
-import { dbOrTx } from '@docmost/db/utils';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
+import { Label } from '@akasha/db/types/entity.types';
+import { dbOrTx } from '@akasha/db/utils';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
+import { executeWithCursorPagination } from '@akasha/db/pagination/cursor-pagination';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
 import { normalizeLabelName } from '../../../core/label/utils';
 

@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { JsonValue } from '@docmost/db/types/db';
+import { JsonValue } from '@akasha/db/types/db';
 import {
   KnowledgeReviewApplication,
   InsertableKnowledgeReviewApplication,
   UpdatableKnowledgeReviewApplication,
-} from '@docmost/db/types/entity.types';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { dbOrTx } from '@docmost/db/utils';
+} from '@akasha/db/types/entity.types';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
+import { dbOrTx } from '@akasha/db/utils';
 
 @Injectable()
 export class KnowledgeReviewApplicationRepo {

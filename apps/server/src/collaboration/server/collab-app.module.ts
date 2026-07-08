@@ -4,7 +4,7 @@ import { AppService } from '../../app.service';
 import { EnvironmentModule } from '../../integrations/environment/environment.module';
 import { EnvironmentService } from '../../integrations/environment/environment.service';
 import { CollaborationModule } from '../collaboration.module';
-import { DatabaseModule } from '@docmost/db/database.module';
+import { DatabaseModule } from '@akasha/db/database.module';
 import { QueueModule } from '../../integrations/queue/queue.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { HealthModule } from '../../integrations/health/health.module';

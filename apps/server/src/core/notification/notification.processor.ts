@@ -3,7 +3,7 @@ import { ModuleRef } from '@nestjs/core';
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 import { QueueJob, QueueName } from '../../integrations/queue/constants';
 import {
   IApprovalRejectedNotificationJob,

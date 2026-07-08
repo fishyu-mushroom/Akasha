@@ -11,7 +11,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { LabelType } from '@docmost/db/repos/label/label.repo';
+import { LabelType } from '@akasha/db/repos/label/label.repo';
 import { PageIdDto } from '../../page/dto/page.dto';
 import { normalizeLabelName } from '../utils';
 

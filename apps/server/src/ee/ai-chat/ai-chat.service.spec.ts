@@ -1,7 +1,7 @@
 import { AiChatService } from './ai-chat.service';
-import { AiChatRepo } from '@docmost/db/repos/ai-chat/ai-chat.repo';
-import { SpaceRepo } from '@docmost/db/repos/space/space.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
+import { AiChatRepo } from '@akasha/db/repos/ai-chat/ai-chat.repo';
+import { SpaceRepo } from '@akasha/db/repos/space/space.repo';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
 import { AiKnowledgeChatService } from '../llm-wiki/services/ai-knowledge-chat.service';
 
 describe('AiChatService', () => {

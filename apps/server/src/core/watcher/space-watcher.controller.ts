@@ -12,9 +12,9 @@ import { WatcherService } from './watcher.service';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { User, Workspace } from '@akasha/db/types/entity.types';
 import { SpaceWatcherDto } from './dto/space-watcher.dto';
-import { SpaceRepo } from '@docmost/db/repos/space/space.repo';
+import { SpaceRepo } from '@akasha/db/repos/space/space.repo';
 import SpaceAbilityFactory from '../casl/abilities/space-ability.factory';
 import {
   SpaceCaslAction,

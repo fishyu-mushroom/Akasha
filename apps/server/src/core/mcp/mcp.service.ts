@@ -9,19 +9,19 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { z } from 'zod/v4';
 import { InjectKysely } from 'nestjs-kysely';
 import { sql } from 'kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 import { UserRole, SpaceRole } from '../../common/helpers/types/permission';
-import { User, Workspace } from '@docmost/db/types/entity.types';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
+import { User, Workspace } from '@akasha/db/types/entity.types';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
 import { SpaceMemberService } from '../space/services/space-member.service';
 import { SpaceService } from '../space/services/space.service';
 import { PageService } from '../page/services/page.service';
 import { SearchService } from '../search/search.service';
 import { CommentService } from '../comment/comment.service';
-import { CommentRepo } from '@docmost/db/repos/comment/comment.repo';
+import { CommentRepo } from '@akasha/db/repos/comment/comment.repo';
 import { WorkspaceService } from '../workspace/services/workspace.service';
 import { PageAccessService } from '../page/page-access/page-access.service';
 import SpaceAbilityFactory from '../casl/abilities/space-ability.factory';
@@ -34,7 +34,7 @@ import {
   WorkspaceCaslAction,
   WorkspaceCaslSubject,
 } from '../casl/interfaces/workspace-ability.type';
-import { findHighestUserSpaceRole } from '@docmost/db/repos/space/utils';
+import { findHighestUserSpaceRole } from '@akasha/db/repos/space/utils';
 import { CreateCommentDto } from '../comment/dto/create-comment.dto';
 import { UpdateCommentDto } from '../comment/dto/update-comment.dto';
 import { CreatePageDto, ContentFormat } from '../page/dto/create-page.dto';

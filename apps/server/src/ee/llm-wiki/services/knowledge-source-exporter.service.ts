@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
 import { KnowledgeSourceSnapshot } from '../types/source-snapshot.types';
 
 @Injectable()

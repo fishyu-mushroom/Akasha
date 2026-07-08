@@ -17,7 +17,7 @@ import {
   JwtPdfRenderPayload,
   JwtType,
 } from '../dto/jwt-payload';
-import { User } from '@docmost/db/types/entity.types';
+import { User } from '@akasha/db/types/entity.types';
 import { isUserDisabled } from '../../../common/helpers';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
-import { Workspace } from '@docmost/db/types/entity.types';
+import { Workspace } from '@akasha/db/types/entity.types';
 import { KnowledgeContextPackService } from './knowledge-context-pack.service';
 import { KnowledgeCitationResolverService } from './knowledge-citation-resolver.service';
 import { KNOWLEDGE_COMPLETENESS_NOTICE } from './knowledge-retrieval.service';

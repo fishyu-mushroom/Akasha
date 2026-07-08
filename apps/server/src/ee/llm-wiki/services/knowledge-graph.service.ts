@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { KnowledgeCapsuleRepo } from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
+import { KnowledgeCapsuleRepo } from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
+import { UserRepo } from '@akasha/db/repos/user/user.repo';
 import { SpaceAuthorizationService } from '../../../core/space/services/space-authorization.service';
 import { KnowledgeSourceAuthorizationService } from './knowledge-source-authorization.service';
 

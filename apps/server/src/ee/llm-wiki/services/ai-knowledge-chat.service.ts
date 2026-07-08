@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
-import { Workspace } from '@docmost/db/types/entity.types';
+import { Workspace } from '@akasha/db/types/entity.types';
 import { KNOWLEDGE_ANSWER_PROVIDER } from '../llm-wiki.constants';
 import {
   KnowledgeAnswerProvider,

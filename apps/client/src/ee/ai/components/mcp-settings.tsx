@@ -52,7 +52,7 @@ export default function McpSettings() {
             <Trans
               i18nKey="View the <anchor>MCP documentation</anchor>."
               components={{
-                anchor: <Anchor href="https://docmost.com/docs/user-guide/mcp" target="_blank" size="sm" />,
+                anchor: <Anchor href="https://akasha.com/docs/user-guide/mcp" target="_blank" size="sm" />,
               }}
             />
           </Text>

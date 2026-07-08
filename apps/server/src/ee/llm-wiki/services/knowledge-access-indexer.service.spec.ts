@@ -1,6 +1,6 @@
-import { KnowledgeAccessPolicyRepo } from '@docmost/db/repos/llm-wiki/knowledge-access-policy.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { KnowledgeAccessPolicyRepo } from '@akasha/db/repos/llm-wiki/knowledge-access-policy.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
 import { KnowledgeAccessIndexerService } from './knowledge-access-indexer.service';
 
 describe('KnowledgeAccessIndexerService', () => {

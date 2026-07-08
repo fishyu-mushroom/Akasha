@@ -72,11 +72,11 @@ export default function OssDetails() {
         <Text size="sm" c="dimmed">
           Get an enterprise trial key at{" "}
           <a
-            href="https://customers.docmost.com/"
+            href="https://customers.akasha.com/"
             target="_blank"
             rel="noopener noreferrer"
           >
-            customers.docmost.com
+            customers.akasha.com
           </a>
           .
         </Text>
@@ -84,17 +84,17 @@ export default function OssDetails() {
         <Text size="sm" c="dimmed">
           Visit{" "}
           <a
-            href="https://docmost.com/pricing"
+            href="https://akasha.com/pricing"
             target="_blank"
             rel="noopener noreferrer"
           >
-            docmost.com/pricing
+            akasha.com/pricing
           </a>{" "}
           to purchase an enterprise license.
         </Text>
         <Text size="sm" c="dimmed">
           For inquiries, contact{" "}
-          <a href="mailto:sales@docmost.com">sales@docmost.com</a>
+          <a href="mailto:sales@akasha.com">sales@akasha.com</a>
         </Text>
       </Stack>
     </Stack>

@@ -1,9 +1,9 @@
 import { Job } from 'bullmq';
 import { Queue } from 'bullmq';
-import { KnowledgeCapsuleRepo } from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
-import { KnowledgeReviewApplicationRepo } from '@docmost/db/repos/llm-wiki/knowledge-review-application.repo';
-import { KnowledgeSourceRepo } from '@docmost/db/repos/llm-wiki/knowledge-source.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { KnowledgeCapsuleRepo } from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
+import { KnowledgeReviewApplicationRepo } from '@akasha/db/repos/llm-wiki/knowledge-review-application.repo';
+import { KnowledgeSourceRepo } from '@akasha/db/repos/llm-wiki/knowledge-source.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
 import { QueueJob } from '../../../integrations/queue/constants';
 import { KnowledgeCompilerAdapter } from '../adapters/knowledge-compiler.adapter';
 import { KnowledgeAccessIndexerService } from '../services/knowledge-access-indexer.service';
@@ -35,8 +35,8 @@ describe('LlmWikiProcessor', () => {
         workspaceId: 'workspace-1',
         spaceId: 'space-1',
         sources: [],
-        compilerVersion: 'docmost-internal-compiler',
-        promptVersion: 'docmost-enterprise-kb-v1',
+        compilerVersion: 'akasha-internal-compiler',
+        promptVersion: 'akasha-enterprise-kb-v1',
         compilerRunId: 'run-1',
         artifacts: [],
         diagnostics: { warnings: [], errors: [] },
@@ -76,8 +76,8 @@ describe('LlmWikiProcessor', () => {
     expect(compiler.compileSpace).toHaveBeenCalledWith({
       workspaceId: 'workspace-1',
       spaceId: 'space-1',
-      compilerVersion: 'docmost-internal-compiler',
-      promptVersion: 'docmost-enterprise-kb-v1',
+      compilerVersion: 'akasha-internal-compiler',
+      promptVersion: 'akasha-enterprise-kb-v1',
       sources: [
         {
           workspaceId: 'workspace-1',
@@ -546,8 +546,8 @@ function createCompiler(): KnowledgeCompilerAdapter {
       workspaceId: 'workspace-1',
       spaceId: 'space-1',
       sources: [],
-      compilerVersion: 'docmost-internal-compiler',
-      promptVersion: 'docmost-enterprise-kb-v1',
+      compilerVersion: 'akasha-internal-compiler',
+      promptVersion: 'akasha-enterprise-kb-v1',
       compilerRunId: 'run-1',
       artifacts: [],
       diagnostics: { warnings: [], errors: [] },

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { KnowledgeReviewApplicationRepo } from '@docmost/db/repos/llm-wiki/knowledge-review-application.repo';
-import { KnowledgeReviewSnapshotRepo } from '@docmost/db/repos/llm-wiki/knowledge-review-snapshot.repo';
-import { KnowledgeReviewApplication as KnowledgeReviewApplicationRow } from '@docmost/db/types/entity.types';
+import { KnowledgeReviewApplicationRepo } from '@akasha/db/repos/llm-wiki/knowledge-review-application.repo';
+import { KnowledgeReviewSnapshotRepo } from '@akasha/db/repos/llm-wiki/knowledge-review-snapshot.repo';
+import { KnowledgeReviewApplication as KnowledgeReviewApplicationRow } from '@akasha/db/types/entity.types';
 import { ReviewDocMeta } from './knowledge-artifact-wiki-source';
 import {
   reviewApplicationSchema,

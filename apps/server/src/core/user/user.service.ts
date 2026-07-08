@@ -1,4 +1,4 @@
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
+import { UserRepo } from '@akasha/db/repos/user/user.repo';
 import {
   BadRequestException,
   Inject,
@@ -9,7 +9,7 @@ import {
 import { UpdateUserDto } from './dto/update-user.dto';
 import { NotificationSettingKey } from '../notification/notification.constants';
 import { comparePasswordHash, diffAuditTrackedFields } from 'src/common/helpers/utils';
-import { Workspace } from '@docmost/db/types/entity.types';
+import { Workspace } from '@akasha/db/types/entity.types';
 import { validateSsoEnforcement } from '../auth/auth.util';
 import { AuditEvent, AuditResource } from '../../common/events/audit-events';
 import {

@@ -1,5 +1,5 @@
 import classes from "./node-resize.module.css";
-import { ResizableNodeViewDirection } from "@docmost/editor-ext";
+import { ResizableNodeViewDirection } from "@akasha/editor-ext";
 
 export function createResizeHandle(
   direction: ResizableNodeViewDirection,

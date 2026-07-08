@@ -1,4 +1,4 @@
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
 import { UserRole } from '../../../common/helpers/types/permission';
 import { SpaceAuthorizationService } from './space-authorization.service';
 

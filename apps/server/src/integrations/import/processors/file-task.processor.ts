@@ -7,7 +7,7 @@ import { FileTaskStatus } from '../utils/file.utils';
 import { StorageService } from '../../storage/storage.service';
 import { ModuleRef } from '@nestjs/core';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 
 @Processor(QueueName.FILE_TASK_QUEUE)
 export class FileTaskProcessor extends WorkerHost implements OnModuleDestroy {

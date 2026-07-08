@@ -1,7 +1,7 @@
 import { EditorProvider } from "@tiptap/react";
 import { useMemo } from "react";
 import { mainExtensions } from "@/features/editor/extensions/extensions";
-import { UniqueID } from "@docmost/editor-ext";
+import { UniqueID } from "@akasha/editor-ext";
 
 type Props = {
   content: unknown;

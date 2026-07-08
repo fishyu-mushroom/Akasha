@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { JsonValue } from '@docmost/db/types/db';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { dbOrTx } from '@docmost/db/utils';
-import { KnowledgeReviewSnapshot } from '@docmost/db/types/entity.types';
+import { JsonValue } from '@akasha/db/types/db';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
+import { dbOrTx } from '@akasha/db/utils';
+import { KnowledgeReviewSnapshot } from '@akasha/db/types/entity.types';
 
 type UpsertKnowledgeReviewSnapshotInput = {
   workspaceId: string;

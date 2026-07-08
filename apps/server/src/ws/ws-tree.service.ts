@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Page } from '@docmost/db/types/entity.types';
+import { Page } from '@akasha/db/types/entity.types';
 import { WsService } from './ws.service';
 
 @Injectable()

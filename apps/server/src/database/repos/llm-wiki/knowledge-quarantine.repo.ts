@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { dbOrTx } from '@docmost/db/utils';
-import { JsonValue } from '@docmost/db/types/db';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
+import { dbOrTx } from '@akasha/db/utils';
+import { JsonValue } from '@akasha/db/types/db';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
 
 export type KnowledgeQuarantinedArtifactRecord = {
   artifactId?: string | null;

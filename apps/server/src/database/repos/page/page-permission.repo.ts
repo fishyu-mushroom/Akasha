@@ -2,22 +2,22 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { dbOrTx } from '@docmost/db/utils';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
+import { dbOrTx } from '@akasha/db/utils';
 import {
   InsertablePageAccess,
   InsertablePagePermission,
   PageAccess,
   PagePermission,
-} from '@docmost/db/types/entity.types';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+} from '@akasha/db/types/entity.types';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 import { ExpressionBuilder, sql, SqlBool } from 'kysely';
-import { GroupRepo } from '@docmost/db/repos/group/group.repo';
-import { DB } from '@docmost/db/types/db';
+import { GroupRepo } from '@akasha/db/repos/group/group.repo';
+import { DB } from '@akasha/db/types/db';
 import {
   CursorPaginationResult,
   executeWithCursorPagination,
-} from '@docmost/db/pagination/cursor-pagination';
+} from '@akasha/db/pagination/cursor-pagination';
 import { PagePermissionMember } from './types/page-permission.types';
 import { SourcePageRestrictedAncestorRequirements } from './types/page-permission.types';
 import { withCache } from '../../../common/helpers/with-cache';

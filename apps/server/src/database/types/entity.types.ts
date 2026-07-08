@@ -57,7 +57,7 @@ import {
   Audit as _Audit,
   Templates,
 } from './db';
-import { PageEmbeddings } from '@docmost/db/types/embeddings.types';
+import { PageEmbeddings } from '@akasha/db/types/embeddings.types';
 
 // AI Chat
 export type AiChat = Selectable<AiChats>;

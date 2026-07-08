@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { sql } from 'kysely';
-import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { executeWithCursorPagination } from '@akasha/db/pagination/cursor-pagination';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 import {
   AiChat,
   AiChatMessage,
   InsertableAiChatMessage,
-} from '@docmost/db/types/entity.types';
+} from '@akasha/db/types/entity.types';
 
 @Injectable()
 export class AiChatRepo {

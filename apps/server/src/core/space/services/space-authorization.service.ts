@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
 import {
   SpaceRole,
   UserRole,

@@ -4,7 +4,7 @@ import { QueueName } from '../../queue/constants';
 import { Job } from 'bullmq';
 import { MailService } from '../mail.service';
 import { MailMessage } from '../interfaces/mail.message';
-import { NotificationRepo } from '@docmost/db/repos/notification/notification.repo';
+import { NotificationRepo } from '@akasha/db/repos/notification/notification.repo';
 
 @Processor(QueueName.EMAIL_QUEUE)
 export class EmailProcessor extends WorkerHost implements OnModuleDestroy {

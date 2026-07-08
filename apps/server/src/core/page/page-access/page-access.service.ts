@@ -1,12 +1,12 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Page, User } from '@docmost/db/types/entity.types';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
+import { Page, User } from '@akasha/db/types/entity.types';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
 import SpaceAbilityFactory from '../../casl/abilities/space-ability.factory';
 import {
   SpaceCaslAction,
   SpaceCaslSubject,
 } from '../../casl/interfaces/space-ability.type';
-import { SpaceRepo } from '@docmost/db/repos/space/space.repo';
+import { SpaceRepo } from '@akasha/db/repos/space/space.repo';
 import { UserRole } from '../../../common/helpers/types/permission';
 
 @Injectable()

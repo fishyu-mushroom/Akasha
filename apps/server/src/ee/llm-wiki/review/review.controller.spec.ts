@@ -1,6 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { User, Workspace } from '@akasha/db/types/entity.types';
 import { AuditEvent, AuditResource } from '../../../common/events/audit-events';
 import { UserRole } from '../../../common/helpers/types/permission';
 import { IAuditService } from '../../../integrations/audit/audit.service';

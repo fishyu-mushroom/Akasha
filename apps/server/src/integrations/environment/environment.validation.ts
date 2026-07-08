@@ -166,7 +166,7 @@ export class EnvironmentVariables {
     { protocols: ['http', 'https'], require_tld: false },
     {
       message:
-        'CLICKHOUSE_URL must be a valid URL e.g http://user:password@localhost:8123/docmost',
+        'CLICKHOUSE_URL must be a valid URL e.g http://user:password@localhost:8123/akasha',
     },
   )
   CLICKHOUSE_URL: string;

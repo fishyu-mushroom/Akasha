@@ -2,16 +2,16 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from '@docmost/db/types/entity.types';
+import { User } from '@akasha/db/types/entity.types';
 import { SessionService } from '../../core/session/session.service';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
+import { UserRepo } from '@akasha/db/repos/user/user.repo';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 import { request } from 'undici';
 import { SpaceService } from '../../core/space/services/space.service';
 import { WorkspaceService } from '../../core/workspace/services/workspace.service';
-import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
-import { executeTx } from '@docmost/db/utils';
+import { GroupUserRepo } from '@akasha/db/repos/group/group-user.repo';
+import { executeTx } from '@akasha/db/utils';
 
 export interface HoidcProviderConfig {
   ssoApi: string;

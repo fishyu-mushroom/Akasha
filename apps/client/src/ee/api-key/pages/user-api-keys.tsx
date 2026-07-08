@@ -61,7 +61,7 @@ export default function UserApiKeys() {
         <Trans
           i18nKey="View the <anchor>API documentation</anchor> for usage details."
           components={{
-            anchor: <Anchor href="https://docmost.com/api-docs" target="_blank" size="sm" />,
+            anchor: <Anchor href="https://akasha.com/api-docs" target="_blank" size="sm" />,
           }}
         />
       </Text>
@@ -73,7 +73,7 @@ export default function UserApiKeys() {
               "Your workspace has MCP enabled. Use your API key to connect AI assistants.",
             )}{" "}
             <Anchor
-              href="https://docmost.com/docs/user-guide/mcp"
+              href="https://akasha.com/docs/user-guide/mcp"
               target="_blank"
               size="sm"
             >

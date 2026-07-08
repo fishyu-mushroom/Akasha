@@ -1,18 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
 import {
   ICommentNotificationJob,
   ICommentResolvedNotificationJob,
 } from '../../../integrations/queue/constants/queue.interface';
 import { NotificationService } from '../notification.service';
 import { NotificationType } from '../notification.constants';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
-import { WatcherRepo } from '@docmost/db/repos/watcher/watcher.repo';
-import { CommentMentionEmail } from '@docmost/transactional/emails/comment-mention-email';
-import { CommentCreateEmail } from '@docmost/transactional/emails/comment-created-email';
-import { CommentResolvedEmail } from '@docmost/transactional/emails/comment-resolved-email';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
+import { PagePermissionRepo } from '@akasha/db/repos/page/page-permission.repo';
+import { WatcherRepo } from '@akasha/db/repos/watcher/watcher.repo';
+import { CommentMentionEmail } from '@akasha/transactional/emails/comment-mention-email';
+import { CommentCreateEmail } from '@akasha/transactional/emails/comment-created-email';
+import { CommentResolvedEmail } from '@akasha/transactional/emails/comment-resolved-email';
 import { getPageTitle } from '../../../common/helpers';
 
 @Injectable()

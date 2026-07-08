@@ -3,11 +3,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AiChatRepo } from '@docmost/db/repos/ai-chat/ai-chat.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { SpaceRepo } from '@docmost/db/repos/space/space.repo';
-import { AiChat, User, Workspace } from '@docmost/db/types/entity.types';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { AiChatRepo } from '@akasha/db/repos/ai-chat/ai-chat.repo';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
+import { SpaceRepo } from '@akasha/db/repos/space/space.repo';
+import { AiChat, User, Workspace } from '@akasha/db/types/entity.types';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
 import { UserRole } from '../../common/helpers/types/permission';
 import { AiKnowledgeChatService } from '../llm-wiki/services/ai-knowledge-chat.service';
 

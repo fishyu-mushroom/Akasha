@@ -3,9 +3,9 @@ import { createHash } from 'crypto';
 import {
   KnowledgeCapsuleRepo,
   KnowledgeChunkSourceRef,
-} from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { KnowledgeChunk, KnowledgePage } from '@docmost/db/types/entity.types';
+} from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
+import { KnowledgeChunk, KnowledgePage } from '@akasha/db/types/entity.types';
 import {
   KnowledgeCitation,
   KnowledgeSourceWindow,

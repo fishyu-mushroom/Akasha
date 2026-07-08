@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { KnowledgeChunk } from '@docmost/db/types/entity.types';
+import { KnowledgeChunk } from '@akasha/db/types/entity.types';
 import {
   KnowledgeChunkCandidate,
   KnowledgeRetrievalSignal,
-} from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
+} from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
 
 type RankableChunk = {
   chunk: KnowledgeChunk;

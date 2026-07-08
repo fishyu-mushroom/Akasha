@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { FileTask, InsertablePage } from '@docmost/db/types/entity.types';
+import { KyselyDB } from '@akasha/db/types/kysely.types';
+import { FileTask, InsertablePage } from '@akasha/db/types/entity.types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { load as cheerioLoad, CheerioAPI } from 'cheerio';
 import * as path from 'path';
@@ -11,11 +11,11 @@ import { generateJitteredKeyBetween } from 'fractional-indexing-jittered';
 import { generateSlugId } from '../../common/helpers';
 import { jsonToText } from '../../collaboration/collaboration.util';
 import { getProsemirrorContent } from '../../common/helpers/prosemirror/utils';
-import { executeTx } from '@docmost/db/utils';
+import { executeTx } from '@akasha/db/utils';
 import { ImportService } from '../../integrations/import/services/import.service';
 import { ImportAttachmentService } from '../../integrations/import/services/import-attachment.service';
 import { PageService } from '../../core/page/services/page.service';
-import { BacklinkRepo } from '@docmost/db/repos/backlink/backlink.repo';
+import { BacklinkRepo } from '@akasha/db/repos/backlink/backlink.repo';
 import {
   buildAttachmentCandidates,
 } from '../../integrations/import/utils/import.utils';

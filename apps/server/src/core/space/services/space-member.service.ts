@@ -4,21 +4,21 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
+import { PaginationOptions } from '@akasha/db/pagination/pagination-options';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
+import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
+import { GroupUserRepo } from '@akasha/db/repos/group/group-user.repo';
 import { AddSpaceMembersDto } from '../dto/add-space-members.dto';
 import { InjectKysely } from 'nestjs-kysely';
-import { Space, SpaceMember, User } from '@docmost/db/types/entity.types';
-import { SpaceRepo } from '@docmost/db/repos/space/space.repo';
+import { Space, SpaceMember, User } from '@akasha/db/types/entity.types';
+import { SpaceRepo } from '@akasha/db/repos/space/space.repo';
 import { RemoveSpaceMemberDto } from '../dto/remove-space-member.dto';
 import { UpdateSpaceMemberRoleDto } from '../dto/update-space-member-role.dto';
 import { SpaceRole } from '../../../common/helpers/types/permission';
-import { CursorPaginationResult } from '@docmost/db/pagination/cursor-pagination';
-import { WatcherRepo } from '@docmost/db/repos/watcher/watcher.repo';
-import { FavoriteRepo } from '@docmost/db/repos/favorite/favorite.repo';
-import { executeTx } from '@docmost/db/utils';
+import { CursorPaginationResult } from '@akasha/db/pagination/cursor-pagination';
+import { WatcherRepo } from '@akasha/db/repos/watcher/watcher.repo';
+import { FavoriteRepo } from '@akasha/db/repos/favorite/favorite.repo';
+import { executeTx } from '@akasha/db/utils';
 import { AuditEvent, AuditResource } from '../../../common/events/audit-events';
 import {
   AUDIT_SERVICE,

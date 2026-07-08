@@ -7,7 +7,7 @@ import {
 } from './collaboration.util';
 import { setYjsMark, updateYjsMarkAttribute, YjsSelection } from './yjs.util';
 import * as Y from 'yjs';
-import { User } from '@docmost/db/types/entity.types';
+import { User } from '@akasha/db/types/entity.types';
 
 export type CollabEventHandlers = ReturnType<
   CollaborationHandler['getHandlers']

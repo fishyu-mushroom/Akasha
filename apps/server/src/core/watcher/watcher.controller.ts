@@ -11,9 +11,9 @@ import { WatcherService } from './watcher.service';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { User, Workspace } from '@akasha/db/types/entity.types';
 import { WatcherPageDto } from './dto/watcher.dto';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
 import { PageAccessService } from '../page/page-access/page-access.service';
 
 @UseGuards(JwtAuthGuard)

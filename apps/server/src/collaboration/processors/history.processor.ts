@@ -13,8 +13,8 @@ import {
   extractPageMentions,
   extractInternalLinkSlugIds,
 } from '../../common/helpers/prosemirror/utils';
-import { PageHistoryRepo } from '@docmost/db/repos/page/page-history.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+import { PageHistoryRepo } from '@akasha/db/repos/page/page-history.repo';
+import { PageRepo } from '@akasha/db/repos/page/page.repo';
 import { isDeepStrictEqual } from 'node:util';
 import { CollabHistoryService } from '../services/collab-history.service';
 import { WatcherService } from '../../core/watcher/watcher.service';

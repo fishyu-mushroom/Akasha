@@ -1,5 +1,5 @@
-import { KnowledgeCapsuleRepo } from '@docmost/db/repos/llm-wiki/knowledge-capsule.repo';
-import { KnowledgeSourceRepo } from '@docmost/db/repos/llm-wiki/knowledge-source.repo';
+import { KnowledgeCapsuleRepo } from '@akasha/db/repos/llm-wiki/knowledge-capsule.repo';
+import { KnowledgeSourceRepo } from '@akasha/db/repos/llm-wiki/knowledge-source.repo';
 import { KnowledgeArtifactValidatorService } from './knowledge-artifact-validator.service';
 import { KnowledgeImportService } from './knowledge-import.service';
 import { CompileSpaceInput } from '../types/compiler-artifact.types';
