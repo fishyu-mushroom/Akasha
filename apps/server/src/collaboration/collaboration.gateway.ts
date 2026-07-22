@@ -60,11 +60,7 @@ export class CollaborationGateway {
       // @ts-ignore
       this.redisSync = new RedisSyncExtension({
         redis: new RedisClient({
-          host: this.redisConfig.host,
-          port: this.redisConfig.port,
-          password: this.redisConfig.password,
-          db: this.redisConfig.db,
-          family: this.redisConfig.family,
+          ...this.redisConfig,
           retryStrategy: createRetryStrategy(),
         }),
         serverId: `collab-${os?.hostname()}-${nanoid(10)}`,
@@ -116,7 +112,11 @@ export class CollaborationGateway {
 
       // Forward close events
       client.on('close', (code: number, reason: Buffer) => {
-        this.redisSync!.onSocketClose(socketId, code, reason.buffer as ArrayBuffer);
+        this.redisSync!.onSocketClose(
+          socketId,
+          code,
+          reason.buffer as ArrayBuffer,
+        );
       });
 
       // Forward pong events for keepalive
