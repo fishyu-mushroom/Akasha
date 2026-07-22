@@ -381,5 +381,5 @@ Organizations own their:
 
 Memory is not something you rent. You cannot rent a nervous system.
 
-
+pnpm --filter ./apps/server migration:latest
 CREATE EXTENSION IF NOT EXISTS vector;
