@@ -22,11 +22,7 @@ import Redis from 'ioredis';
           errorMessage: 'Too many requests',
           storage: new ThrottlerStorageRedisService(
             new Redis({
-              host: redisConfig.host,
-              port: redisConfig.port,
-              password: redisConfig.password,
-              db: redisConfig.db,
-              family: redisConfig.family,
+              ...redisConfig,
               keyPrefix: 'throttle:',
             }),
           ),
