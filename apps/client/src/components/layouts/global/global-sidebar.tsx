@@ -46,7 +46,7 @@ export default function GlobalSidebar() {
     : "/settings/account/preferences";
   const mainNavItems = [
     { label: "Home", icon: IconHome, path: "/home" },
-    { label: "Knowledge", icon: IconDatabaseSearch, path: "/knowledge" },
+    { label: "AI Q&A", icon: IconDatabaseSearch, path: "/ai" },
     { label: "Review", icon: IconChecklist, path: "/review" },
     { label: "Favorites", icon: IconStar, path: "/favorites" },
     { label: "Spaces", icon: IconLayoutGrid, path: "/spaces" },
