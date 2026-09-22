@@ -310,12 +310,10 @@ export class KnowledgeSpaceRunnerService {
                 sourcePageId: page.sourcePageId,
                 sourceVersion: page.expectedSourceVersion,
                 sourceContentHash: page.expectedSourceContentHash,
-                effectiveKnowledgeHash:
-                  page.targetEffectiveKnowledgeHash ??
-                  page.expectedSourceContentHash,
                 spaceRunId: input.spaceRunId,
                 knowledgeGeneration: input.knowledgeGeneration,
                 images: page.images as KnowledgeImageMergePageData['images'],
+                expectedExtractionIds: page.expectedExtractionIds,
               },
               compileTaskId: `${input.spaceJobId}__${page.sourcePageId}`,
               execution: this.imageMergeExecutionContext(lease, page),

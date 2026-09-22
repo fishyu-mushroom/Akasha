@@ -42,6 +42,11 @@ export interface RunPageBindingPlan {
   mergeStatus: KnowledgeSpaceCompileRunPageMergeStatus;
   errorCode?: string | null;
   errorMessage?: string | null;
+  /**
+   * Binding-time cache/reuse hint. It may omit images that were still pending
+   * at binding, so merge publication must derive its identity from frozen
+   * RunImage extraction ids instead.
+   */
   targetEffectiveKnowledgeHash?: string | null;
   reused?: boolean;
   qualityStatus?: 'normal' | 'degraded' | 'partial_image';
@@ -221,7 +226,6 @@ export class KnowledgeSpaceExecutionRepo {
           'mergeAttemptCount',
           'expectedSourceVersion',
           'expectedSourceContentHash',
-          'targetEffectiveKnowledgeHash',
           'createdAt',
         ])
         .where('runId', '=', lease.runId)
@@ -256,6 +260,8 @@ export class KnowledgeSpaceExecutionRepo {
         'fileSize',
         'altText',
         'expectedAttachmentVersion',
+        'status',
+        'extractionId',
       ])
       .where(
         'runPageId',
@@ -271,17 +277,28 @@ export class KnowledgeSpaceExecutionRepo {
       pageImages.push(image);
       imagesByPage.set(image.runPageId, pageImages);
     }
-    return pages.map((page) => ({
-      ...page,
-      images: (imagesByPage.get(page.id) ?? []).map((image) => ({
-        attachmentId: image.attachmentId,
-        fileName: image.fileName,
-        mimeType: image.mimeType,
-        fileSize: image.fileSize === null ? null : Number(image.fileSize),
-        attachmentVersion: image.expectedAttachmentVersion.toISOString(),
-        ...(image.altText ? { altText: image.altText } : {}),
-      })),
-    }));
+    return pages.map((page) => {
+      const pageImages = imagesByPage.get(page.id) ?? [];
+      return {
+        ...page,
+        // The exact extraction ids this Run froze for its successful images.
+        // The merge build reads these ids directly; an id that can no longer
+        // satisfy the source/attachment identity gate causes a re-plan.
+        expectedExtractionIds: pageImages
+          .filter(
+            (image) => image.status === 'succeeded' && image.extractionId,
+          )
+          .map((image) => image.extractionId as string),
+        images: pageImages.map((image) => ({
+          attachmentId: image.attachmentId,
+          fileName: image.fileName,
+          mimeType: image.mimeType,
+          fileSize: image.fileSize === null ? null : Number(image.fileSize),
+          attachmentVersion: image.expectedAttachmentVersion.toISOString(),
+          ...(image.altText ? { altText: image.altText } : {}),
+        })),
+      };
+    });
   }
 
   async findSpaceRecoveryCandidates(input: {

@@ -39,10 +39,10 @@ describe('KnowledgePageCompilationService contract', () => {
             sourcePageId: 'page-1',
             sourceVersion: 'v1',
             sourceContentHash: 'sha256:page-1',
-            effectiveKnowledgeHash: 'pending',
             spaceRunId: 'run-1',
             knowledgeGeneration: 1,
             images: [],
+            expectedExtractionIds: [],
           },
           compileTaskId: 'merge-1',
           execution,
@@ -395,10 +395,15 @@ describe('KnowledgePageCompilationService contract', () => {
     };
     const accessIndexer = { reindexSourcePages: jest.fn() };
     const imageEnrichment = {
-      // All extractions failed: no ready images, but the page text survives.
-      readReadySource: jest
-        .fn()
-        .mockResolvedValue({ source, readyImages: [], readyExtractionIds: [] }),
+      // All extractions failed: no frozen extractions to resolve, no missing
+      // ids, but the page text survives.
+      readFrozenSource: jest.fn().mockResolvedValue({
+        source,
+        readyImages: [],
+        readyExtractionIds: [],
+        missingExtractionIds: [],
+        truncatedCount: 0,
+      }),
     };
     const service = new KnowledgePageCompilationService(
       { exportPageSources: jest.fn().mockResolvedValue([source]) } as never,
@@ -425,10 +430,10 @@ describe('KnowledgePageCompilationService contract', () => {
             sourcePageId: 'page-1',
             sourceVersion: 'v1',
             sourceContentHash: 'sha256:page-1',
-            effectiveKnowledgeHash: 'target',
             spaceRunId: 'run-1',
             knowledgeGeneration: 1,
             images: [pageImage],
+            expectedExtractionIds: [],
           },
           compileTaskId: 'merge-1',
           execution,
@@ -442,6 +447,95 @@ describe('KnowledgePageCompilationService contract', () => {
     expect(compiler.compileSpace).toHaveBeenCalled();
     expect(importService.importCompileResult).toHaveBeenCalled();
     expect(compilationRepo.skipAttempt).not.toHaveBeenCalled();
+  });
+
+  it('re-plans instead of publishing when a frozen extraction can no longer be reproduced', async () => {
+    const pageImage = {
+      attachmentId: 'attachment-1',
+      attachmentVersion: '2026-08-03T00:00:00.000Z',
+      fileName: 'diagram.png',
+      mimeType: 'image/png' as const,
+      fileSize: 1024,
+      altText: 'diagram',
+    };
+    const source = {
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      sourcePageId: 'page-1',
+      sourceVersion: 'v1',
+      contentHash: 'sha256:page-1',
+      title: 'Page one',
+      text: 'Page body with a diagram',
+      references: [],
+      images: [pageImage],
+    };
+    const compiler = { compileSpace: jest.fn() };
+    const compilationRepo = {
+      startAttempt: jest.fn(),
+      skipAttempt: jest.fn(),
+    };
+    const imageEnrichment = {
+      // The frozen extraction can no longer be reproduced (re-extraction,
+      // identity change, or deletion), so it comes back as a missing id — even
+      // though a text-only fallback would otherwise be possible.
+      readFrozenSource: jest.fn().mockResolvedValue({
+        source,
+        readyImages: [],
+        readyExtractionIds: [],
+        missingExtractionIds: ['extraction-frozen'],
+        truncatedCount: 0,
+      }),
+    };
+    const service = new KnowledgePageCompilationService(
+      { exportPageSources: jest.fn().mockResolvedValue([source]) } as never,
+      compiler as never,
+      {} as never,
+      {} as never,
+      compilationRepo as never,
+      imageEnrichment as never,
+    );
+    const execution = {
+      isActive: jest.fn().mockResolvedValue(true),
+      completePage: jest.fn(),
+      catalog: jest.fn().mockResolvedValue([]),
+      publicationGuard: jest.fn(),
+      publicationComplete: jest.fn(),
+    };
+
+    await expect(
+      service.mergePageImages(
+        {
+          data: {
+            workspaceId: 'workspace-1',
+            spaceId: 'space-1',
+            sourcePageId: 'page-1',
+            sourceVersion: 'v1',
+            sourceContentHash: 'sha256:page-1',
+            spaceRunId: 'run-1',
+            knowledgeGeneration: 1,
+            images: [pageImage],
+            expectedExtractionIds: ['extraction-frozen'],
+          },
+          compileTaskId: 'merge-1',
+          execution,
+        },
+        new AbortController().signal,
+      ),
+    ).resolves.toMatchObject({ outcome: 'noop' });
+
+    // A drifted extraction must never be published; the page re-plans via a
+    // rerun-triggering error code instead.
+    expect(compiler.compileSpace).not.toHaveBeenCalled();
+    expect(compilationRepo.skipAttempt).toHaveBeenCalledWith(
+      expect.objectContaining({ reasonCode: 'image_snapshot_changed' }),
+    );
+    expect(execution.completePage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'failed',
+        retryable: false,
+        errorCode: 'image_snapshot_changed',
+      }),
+    );
   });
 
   it('skips without publishing when every image failed and the page has no text', async () => {
@@ -470,10 +564,12 @@ describe('KnowledgePageCompilationService contract', () => {
       skipAttempt: jest.fn(),
     };
     const imageEnrichment = {
-      readReadySource: jest.fn().mockResolvedValue({
+      readFrozenSource: jest.fn().mockResolvedValue({
         source: { ...source, text: '' },
         readyImages: [],
         readyExtractionIds: [],
+        missingExtractionIds: [],
+        truncatedCount: 0,
       }),
     };
     const service = new KnowledgePageCompilationService(
@@ -501,10 +597,10 @@ describe('KnowledgePageCompilationService contract', () => {
             sourcePageId: 'page-1',
             sourceVersion: 'v1',
             sourceContentHash: 'sha256:page-1',
-            effectiveKnowledgeHash: 'target',
             spaceRunId: 'run-1',
             knowledgeGeneration: 1,
             images: [pageImage],
+            expectedExtractionIds: [],
           },
           compileTaskId: 'merge-1',
           execution,
