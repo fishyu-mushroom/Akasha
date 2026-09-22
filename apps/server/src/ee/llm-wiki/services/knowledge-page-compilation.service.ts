@@ -217,14 +217,21 @@ export class KnowledgePageCompilationService {
         return { outcome: 'noop', result: noOpPageResult(data, startedAt) };
       }
 
-      if (!source.text.trim() && exportedSource.images?.length) {
+      // Pages that carry images are compiled exactly once, in the image_merge
+      // phase, after every image reaches a terminal state. The text phase only
+      // defers them here (no compile, no publish) so we never pay for a full
+      // text-only round and then recompile+republish the same page once images
+      // finish. The single merge-phase build uses the page text plus whatever
+      // image extractions succeeded (and falls back to text-only if they all
+      // fail). Pages without images keep compiling inline below.
+      if (exportedSource.images?.length) {
         await this.compilationRepo.skipAttempt({
           workspaceId: data.workspaceId,
           sourcePageId,
           compileTaskId,
           reasonCode: 'awaiting_images',
           reasonMessage:
-            'Text phase completed; the page is awaiting image knowledge.',
+            'Text phase deferred; the page is compiled once image knowledge is ready.',
         });
         await this.completeTextPage(input, { status: 'succeeded' });
         return { outcome: 'noop', result: noOpPageResult(data, startedAt) };
@@ -499,18 +506,31 @@ export class KnowledgePageCompilationService {
         promptVersion: DEFAULT_KNOWLEDGE_PROMPT_VERSION,
         readyImages: ready.readyImages,
       });
-      if (ready.readyImages.length === 0) {
+      // A genuine frozen-snapshot drift was already rejected above via
+      // isSameImageMergeSnapshot; reaching here with no ready images means
+      // every image extraction failed permanently. Because image pages no
+      // longer compile in the text phase, this is the single build point, so we
+      // must not silently drop the page:
+      //   - with page text, fall through and compile a text-only version so the
+      //     page still yields knowledge (transient VLM failure must not erase a
+      //     text-bearing page);
+      //   - with no text either, skip without touching prior knowledge and mark
+      //     the run partial. We use a non-rerun error code so a permanent image
+      //     failure does not spin a pointless follow-up run.
+      if (ready.readyImages.length === 0 && !ready.source.text.trim()) {
         await this.compilationRepo.skipAttempt({
           workspaceId: data.workspaceId,
           sourcePageId: data.sourcePageId,
           compileTaskId,
-          reasonCode: 'image_snapshot_changed',
-          reasonMessage: 'Page image knowledge changed before merge.',
+          reasonCode: 'image_extraction_failed',
+          reasonMessage:
+            'All image extractions failed and the page has no text to compile.',
         });
         await this.completeImageMergePage(input, {
           status: 'skipped',
-          errorCode: 'image_snapshot_changed',
-          errorMessage: 'Page image knowledge changed before merge.',
+          errorCode: 'image_extraction_failed',
+          errorMessage:
+            'All image extractions failed and the page has no text to compile.',
         });
         return { outcome: 'noop', result: noOpMergeResult(data, startedAt) };
       }

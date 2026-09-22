@@ -1734,9 +1734,14 @@ export class KnowledgeSpaceCompilationRepo {
           ...(['partial', 'failed'].includes(imageStatus)
             ? { qualityStatus: 'partial_image' as const }
             : {}),
-          ...(nonterminal === 0
-            ? { mergeStatus: succeeded > 0 ? 'pending' : 'skipped' }
-            : {}),
+          // Once every image is terminal we always hand the page to the merge
+          // phase, even when all extractions failed. The merge build is the
+          // single compile point for image pages: with no ready images it
+          // falls back to text-only (so a page with text still yields
+          // knowledge) or skips an empty page without replacing prior
+          // knowledge. Gating on succeeded > 0 here would strand text-bearing
+          // pages whose images all failed.
+          ...(nonterminal === 0 ? { mergeStatus: 'pending' as const } : {}),
           updatedAt: now,
         })
         .where('id', '=', locked.page.id)

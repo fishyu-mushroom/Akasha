@@ -259,4 +259,271 @@ describe('KnowledgePageCompilationService contract', () => {
     );
     warnSpy.mockRestore();
   });
+
+  it('defers any page with images to the merge phase instead of compiling in the text phase', async () => {
+    const source = {
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      sourcePageId: 'page-1',
+      sourceVersion: 'v1',
+      contentHash: 'sha256:page-1',
+      title: 'Page one',
+      text: 'Page body with a diagram',
+      references: [],
+      images: [
+        {
+          attachmentId: 'attachment-1',
+          attachmentVersion: '2026-08-03T00:00:00.000Z',
+          fileName: 'diagram.png',
+          mimeType: 'image/png',
+          fileSize: 1024,
+          altText: 'diagram',
+        },
+      ],
+    };
+    const compiler = { compileSpace: jest.fn() };
+    const compilationRepo = {
+      startAttempt: jest.fn(),
+      updateSourceSnapshot: jest.fn(),
+      skipAttempt: jest.fn(),
+    };
+    const imageEnrichment = {
+      readReadySource: jest
+        .fn()
+        .mockResolvedValue({ source, readyImages: [], readyExtractionIds: [] }),
+    };
+    const service = new KnowledgePageCompilationService(
+      { exportPageSources: jest.fn().mockResolvedValue([source]) } as never,
+      compiler as never,
+      {} as never,
+      {} as never,
+      compilationRepo as never,
+      imageEnrichment as never,
+    );
+    const execution = {
+      isActive: jest.fn().mockResolvedValue(true),
+      markRunning: jest.fn(),
+      completePage: jest.fn(),
+      catalog: jest.fn().mockResolvedValue([]),
+      publicationGuard: jest.fn(),
+    };
+
+    await expect(
+      service.compileTextPage(
+        {
+          data: {
+            workspaceId: 'workspace-1',
+            spaceId: 'space-1',
+            sourcePageIds: ['page-1'],
+            sourceVersion: 'v1',
+            sourceContentHash: 'sha256:page-1',
+            spaceRunId: 'run-1',
+            knowledgeGeneration: 1,
+          },
+          compileTaskId: 'task-1',
+          execution,
+        },
+        new AbortController().signal,
+      ),
+    ).resolves.toMatchObject({ outcome: 'noop' });
+
+    // The text phase must never compile or publish an image page; that happens
+    // exactly once in the merge phase after images reach a terminal state.
+    expect(compiler.compileSpace).not.toHaveBeenCalled();
+    expect(compilationRepo.skipAttempt).toHaveBeenCalledWith(
+      expect.objectContaining({ reasonCode: 'awaiting_images' }),
+    );
+    expect(execution.completePage).toHaveBeenCalledWith({
+      status: 'succeeded',
+    });
+  });
+
+  it('merges text-only when every image extraction failed but the page has text', async () => {
+    const pageImage = {
+      attachmentId: 'attachment-1',
+      attachmentVersion: '2026-08-03T00:00:00.000Z',
+      fileName: 'diagram.png',
+      mimeType: 'image/png' as const,
+      fileSize: 1024,
+      altText: 'diagram',
+    };
+    const source = {
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      sourcePageId: 'page-1',
+      sourceVersion: 'v1',
+      contentHash: 'sha256:page-1',
+      title: 'Page one',
+      text: 'Page body with a diagram',
+      references: [],
+      images: [pageImage],
+    };
+    const artifact = {
+      artifactId: '11111111-1111-4111-8111-111111111111',
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      title: 'Page one',
+      contentMarkdown: '# Page one',
+      sourcePageIds: ['page-1'],
+      artifactKind: 'source_summary',
+      canonicalKey: 'page:page-1',
+      compilerVersion: 'semantic@1',
+      promptVersion: 'semantic@1',
+      compilerRunId: 'run',
+      compileTaskId: 'task',
+      chunks: [{ text: 'Page body with a diagram' }],
+    };
+    const compiler = {
+      compileSpace: jest.fn().mockResolvedValue({
+        artifacts: [artifact],
+        compilerRunId: 'text-only-run',
+        resultQuality: 'normal',
+      }),
+    };
+    const importService = {
+      importCompileResult: jest.fn().mockResolvedValue({
+        importedArtifactCount: 1,
+        quarantinedArtifactCount: 0,
+      }),
+    };
+    const compilationRepo = {
+      startAttempt: jest.fn(),
+      skipAttempt: jest.fn(),
+      succeedAttempt: jest.fn(),
+      failAttempt: jest.fn(),
+      updateStage: jest.fn(),
+    };
+    const accessIndexer = { reindexSourcePages: jest.fn() };
+    const imageEnrichment = {
+      // All extractions failed: no ready images, but the page text survives.
+      readReadySource: jest
+        .fn()
+        .mockResolvedValue({ source, readyImages: [], readyExtractionIds: [] }),
+    };
+    const service = new KnowledgePageCompilationService(
+      { exportPageSources: jest.fn().mockResolvedValue([source]) } as never,
+      compiler as never,
+      importService as never,
+      accessIndexer as never,
+      compilationRepo as never,
+      imageEnrichment as never,
+    );
+    const execution = {
+      isActive: jest.fn().mockResolvedValue(true),
+      completePage: jest.fn(),
+      catalog: jest.fn().mockResolvedValue([]),
+      publicationGuard: jest.fn(),
+      publicationComplete: jest.fn().mockResolvedValue(true),
+    };
+
+    await expect(
+      service.mergePageImages(
+        {
+          data: {
+            workspaceId: 'workspace-1',
+            spaceId: 'space-1',
+            sourcePageId: 'page-1',
+            sourceVersion: 'v1',
+            sourceContentHash: 'sha256:page-1',
+            effectiveKnowledgeHash: 'target',
+            spaceRunId: 'run-1',
+            knowledgeGeneration: 1,
+            images: [pageImage],
+          },
+          compileTaskId: 'merge-1',
+          execution,
+        },
+        new AbortController().signal,
+      ),
+    ).resolves.toMatchObject({ outcome: 'succeeded' });
+
+    // Text-only fallback: a transient VLM failure must not strand a
+    // text-bearing page without knowledge.
+    expect(compiler.compileSpace).toHaveBeenCalled();
+    expect(importService.importCompileResult).toHaveBeenCalled();
+    expect(compilationRepo.skipAttempt).not.toHaveBeenCalled();
+  });
+
+  it('skips without publishing when every image failed and the page has no text', async () => {
+    const pageImage = {
+      attachmentId: 'attachment-1',
+      attachmentVersion: '2026-08-03T00:00:00.000Z',
+      fileName: 'diagram.png',
+      mimeType: 'image/png' as const,
+      fileSize: 1024,
+      altText: 'diagram',
+    };
+    const source = {
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      sourcePageId: 'page-1',
+      sourceVersion: 'v1',
+      contentHash: 'sha256:page-1',
+      title: 'Page one',
+      text: '',
+      references: [],
+      images: [pageImage],
+    };
+    const compiler = { compileSpace: jest.fn() };
+    const compilationRepo = {
+      startAttempt: jest.fn(),
+      skipAttempt: jest.fn(),
+    };
+    const imageEnrichment = {
+      readReadySource: jest.fn().mockResolvedValue({
+        source: { ...source, text: '' },
+        readyImages: [],
+        readyExtractionIds: [],
+      }),
+    };
+    const service = new KnowledgePageCompilationService(
+      { exportPageSources: jest.fn().mockResolvedValue([source]) } as never,
+      compiler as never,
+      {} as never,
+      {} as never,
+      compilationRepo as never,
+      imageEnrichment as never,
+    );
+    const execution = {
+      isActive: jest.fn().mockResolvedValue(true),
+      completePage: jest.fn(),
+      catalog: jest.fn().mockResolvedValue([]),
+      publicationGuard: jest.fn(),
+      publicationComplete: jest.fn(),
+    };
+
+    await expect(
+      service.mergePageImages(
+        {
+          data: {
+            workspaceId: 'workspace-1',
+            spaceId: 'space-1',
+            sourcePageId: 'page-1',
+            sourceVersion: 'v1',
+            sourceContentHash: 'sha256:page-1',
+            effectiveKnowledgeHash: 'target',
+            spaceRunId: 'run-1',
+            knowledgeGeneration: 1,
+            images: [pageImage],
+          },
+          compileTaskId: 'merge-1',
+          execution,
+        },
+        new AbortController().signal,
+      ),
+    ).resolves.toMatchObject({ outcome: 'noop' });
+
+    // No text and no usable image knowledge: skip without touching prior
+    // knowledge, using a non-rerun error code.
+    expect(compiler.compileSpace).not.toHaveBeenCalled();
+    expect(compilationRepo.skipAttempt).toHaveBeenCalledWith(
+      expect.objectContaining({ reasonCode: 'image_extraction_failed' }),
+    );
+    expect(execution.completePage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'skipped',
+        errorCode: 'image_extraction_failed',
+      }),
+    );
+  });
 });

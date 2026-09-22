@@ -567,8 +567,9 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
     ).resolves.toBe(false);
     const completedImage = await compilationRepo.completeRunImage({
       ...image,
-      status: 'succeeded',
-      extractionId: 'extraction-1',
+      status: 'failed',
+      failureClass: 'permanent',
+      errorCode: 'image_extraction_failed',
     });
     expect(completedImage?.imageStatus).toBe('queued');
     const replenished = await compilationRepo.reserveRunImagesFairly({
@@ -577,6 +578,49 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
     expect(
       replenished.filter((item) => item.runId === 'run-images'),
     ).toHaveLength(1);
+
+    const remainingImages = [
+      ...first.filter(
+        (item) =>
+          item.runId === 'run-images' && item.runImageId !== image.runImageId,
+      ),
+      ...replenished.filter((item) => item.runId === 'run-images'),
+    ];
+    let finalCompletion:
+      | Awaited<ReturnType<KnowledgeSpaceCompilationRepo['completeRunImage']>>
+      | undefined;
+    for (const remainingImage of remainingImages) {
+      finalCompletion = await compilationRepo.completeRunImage({
+        ...remainingImage,
+        status: 'failed',
+        failureClass: 'permanent',
+        errorCode: 'image_extraction_failed',
+      });
+    }
+
+    expect(finalCompletion).toEqual(
+      expect.objectContaining({
+        imageStatus: 'partial',
+        succeeded: 0,
+        failed: 6,
+        barrierAdvanced: true,
+      }),
+    );
+    await expect(pageColumns(db, 'run-page-images')).resolves.toEqual(
+      expect.objectContaining({
+        mergeStatus: 'pending',
+        qualityStatus: 'partial_image',
+      }),
+    );
+    const advancedRun = await sql<{ phase: string; status: string }>`
+      select phase, status
+        from knowledge_space_compile_runs
+       where id = 'run-images'
+    `.execute(db);
+    expect(advancedRun.rows[0]).toEqual({
+      phase: 'image_merge',
+      status: 'queued',
+    });
   });
 
   it('publishes merge pages in snapshot order and advances the final barrier once', async () => {
