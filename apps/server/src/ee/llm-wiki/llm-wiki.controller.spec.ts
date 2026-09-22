@@ -13,7 +13,6 @@ import { QueueJob } from '../../integrations/queue/constants';
 import { KNOWLEDGE_COMPLETENESS_NOTICE } from './services/knowledge-retrieval.service';
 import { AiKnowledgeChatService } from './services/ai-knowledge-chat.service';
 import { KnowledgeCitationImageResolverService } from './services/knowledge-citation-image-resolver.service';
-import { KnowledgeImportService } from './services/knowledge-import.service';
 import { LlmWikiController } from './llm-wiki.controller';
 import { KnowledgeDiagnosticsService } from './services/knowledge-diagnostics.service';
 import { KnowledgeGraphService } from './services/knowledge-graph.service';
@@ -637,138 +636,6 @@ describe('LlmWikiController', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
 
     expect(graphService.getSpaceGraph).not.toHaveBeenCalled();
-  });
-
-  it('rejects compile result imports when workspace AI knowledge chat is disabled', async () => {
-    const chatService = {
-      isEnabledForWorkspace: jest.fn().mockReturnValue(false),
-      chat: jest.fn(),
-    };
-    const importService = {
-      importCompileResult: jest.fn(),
-    };
-    const controller = createController({ chatService, importService });
-
-    await expect(
-      controller.importCompileResult(
-        compileResultDto(),
-        adminUser(),
-        workspace(),
-      ),
-    ).rejects.toBeInstanceOf(ForbiddenException);
-
-    expect(importService.importCompileResult).not.toHaveBeenCalled();
-  });
-
-  it('rejects compile result imports from workspace members', async () => {
-    const importService = {
-      importCompileResult: jest.fn(),
-    };
-    const controller = createController({ importService });
-
-    await expect(
-      controller.importCompileResult(
-        compileResultDto(),
-        user({ role: UserRole.MEMBER }),
-        workspace(),
-      ),
-    ).rejects.toBeInstanceOf(ForbiddenException);
-
-    expect(importService.importCompileResult).not.toHaveBeenCalled();
-  });
-
-  it('imports compile results through the database import service and audits metadata only', async () => {
-    const importService = {
-      importCompileResult: jest.fn().mockResolvedValue({
-        importedArtifactCount: 1,
-        quarantinedArtifactCount: 0,
-      }),
-    };
-    const auditService = {
-      log: jest.fn(),
-    };
-    const controller = createController({ importService, auditService });
-
-    await expect(
-      controller.importCompileResult(
-        compileResultDto(),
-        adminUser(),
-        workspace(),
-      ),
-    ).resolves.toEqual({
-      importedArtifactCount: 1,
-      quarantinedArtifactCount: 0,
-    });
-
-    expect(importService.importCompileResult).toHaveBeenCalledWith({
-      input: {
-        workspaceId: 'workspace-1',
-        spaceId: 'space-1',
-        compilerVersion: 'test-compiler',
-        promptVersion: 'test-prompt',
-        sources: [
-          {
-            workspaceId: 'workspace-1',
-            spaceId: 'space-1',
-            sourcePageId: 'page-1',
-            sourceVersion: 'v1',
-            contentHash: 'sha256:page-1',
-            title: 'Kafka',
-            text: 'Kafka backs async events.',
-            references: [],
-          },
-        ],
-      },
-      artifacts: [
-        {
-          workspaceId: 'workspace-1',
-          spaceId: 'space-1',
-          artifactId: '11111111-1111-4111-8111-111111111111',
-          title: 'Kafka usage',
-          contentMarkdown: 'Kafka backs async events.',
-          sourcePageIds: ['page-1'],
-          compilerVersion: 'test-compiler',
-          promptVersion: 'test-prompt',
-          inputSourceRefs: [
-            {
-              workspaceId: 'workspace-1',
-              spaceId: 'space-1',
-              sourcePageId: 'page-1',
-              sourceVersion: 'v1',
-              contentHash: 'sha256:page-1',
-            },
-          ],
-          chunks: [
-            {
-              text: 'Kafka backs async events.',
-              inputSourceRefs: [
-                {
-                  workspaceId: 'workspace-1',
-                  spaceId: 'space-1',
-                  sourcePageId: 'page-1',
-                  sourceVersion: 'v1',
-                  contentHash: 'sha256:page-1',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    expect(auditService.log).toHaveBeenCalledWith({
-      event: AuditEvent.KNOWLEDGE_IMPORT,
-      resourceType: AuditResource.KNOWLEDGE,
-      resourceId: 'space-1',
-      metadata: {
-        artifactCount: 1,
-        sourceCount: 1,
-        importedArtifactCount: 1,
-        quarantinedArtifactCount: 0,
-      },
-    });
-    expect(JSON.stringify(auditService.log.mock.calls)).not.toContain(
-      'Kafka backs async events.',
-    );
   });
 
   it('creates or coalesces durable runs without directly writing Redis', async () => {
@@ -1688,7 +1555,6 @@ function createController(
   overrides: {
     chatService?: Partial<AiKnowledgeChatService>;
     auditService?: Partial<IAuditService>;
-    importService?: Partial<KnowledgeImportService>;
     citationImageResolver?: Partial<KnowledgeCitationImageResolverService>;
     diagnosticsService?: Partial<KnowledgeDiagnosticsService>;
     graphService?: Partial<KnowledgeGraphService>;
@@ -1723,10 +1589,6 @@ function createController(
       log: jest.fn(),
       ...overrides.auditService,
     } as unknown as IAuditService,
-    {
-      importCompileResult: jest.fn(),
-      ...overrides.importService,
-    } as unknown as KnowledgeImportService,
     {
       findWorkspaceSpaceIds: jest.fn().mockResolvedValue([]),
       getRunDiagnosticsSummary: jest.fn(),
@@ -1824,59 +1686,4 @@ function workspace(): Workspace {
     plan: 'business',
     settings: { ai: { chat: true } },
   } as unknown as Workspace;
-}
-
-function compileResultDto() {
-  return {
-    spaceId: 'space-1',
-    compilerVersion: 'test-compiler',
-    promptVersion: 'test-prompt',
-    sources: [
-      {
-        workspaceId: 'workspace-1',
-        spaceId: 'space-1',
-        sourcePageId: 'page-1',
-        sourceVersion: 'v1',
-        contentHash: 'sha256:page-1',
-        title: 'Kafka',
-        text: 'Kafka backs async events.',
-        references: [],
-      },
-    ],
-    artifacts: [
-      {
-        workspaceId: 'workspace-1',
-        spaceId: 'space-1',
-        artifactId: '11111111-1111-4111-8111-111111111111',
-        title: 'Kafka usage',
-        contentMarkdown: 'Kafka backs async events.',
-        sourcePageIds: ['page-1'],
-        compilerVersion: 'test-compiler',
-        promptVersion: 'test-prompt',
-        inputSourceRefs: [
-          {
-            workspaceId: 'workspace-1',
-            spaceId: 'space-1',
-            sourcePageId: 'page-1',
-            sourceVersion: 'v1',
-            contentHash: 'sha256:page-1',
-          },
-        ],
-        chunks: [
-          {
-            text: 'Kafka backs async events.',
-            inputSourceRefs: [
-              {
-                workspaceId: 'workspace-1',
-                spaceId: 'space-1',
-                sourcePageId: 'page-1',
-                sourceVersion: 'v1',
-                contentHash: 'sha256:page-1',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  };
 }

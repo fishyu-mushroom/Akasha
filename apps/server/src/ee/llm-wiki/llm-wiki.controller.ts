@@ -41,10 +41,6 @@ import {
   IAuditService,
 } from '../../integrations/audit/audit.service';
 import { QueueJob, QueueName } from '../../integrations/queue/constants';
-import {
-  DEFAULT_KNOWLEDGE_COMPILER_VERSION,
-  DEFAULT_KNOWLEDGE_PROMPT_VERSION,
-} from './llm-wiki.constants';
 import { AdminKnowledgeSpaceActionDto } from './dto/admin-space-action.dto';
 import { CompileSpacesDto } from './dto/compile-spaces.dto';
 import { CancelKnowledgeRunDto } from './dto/cancel-knowledge-run.dto';
@@ -59,7 +55,6 @@ import {
   AdminKnowledgeRunSummaryDto,
 } from './dto/admin-diagnostics.dto';
 import { AdminKnowledgeRetryPagesDto } from './dto/admin-retry-pages.dto';
-import { ImportCompileResultDto } from './dto/import-compile-result.dto';
 import { KnowledgeGraphDto } from './dto/knowledge-graph.dto';
 import { KnowledgeSpaceOperationDto } from './dto/knowledge-space-operation.dto';
 import { QueryKnowledgeDto } from './dto/query-knowledge.dto';
@@ -74,7 +69,6 @@ import { KnowledgeCitationImageResolverService } from './services/knowledge-cita
 import { KnowledgeQueryCitation } from './services/knowledge-context-pack.service';
 import { KnowledgeDiagnosticsService } from './services/knowledge-diagnostics.service';
 import { KnowledgeGraphService } from './services/knowledge-graph.service';
-import { KnowledgeImportService } from './services/knowledge-import.service';
 import { KnowledgeSourceExporterService } from './services/knowledge-source-exporter.service';
 import { KnowledgeSpaceCompilationService } from './services/knowledge-space-compilation.service';
 import { KnowledgeSpaceResetService } from './services/knowledge-space-reset.service';
@@ -112,7 +106,6 @@ export class LlmWikiController {
     private readonly chatService: AiKnowledgeChatService,
     private readonly citationImageResolver: KnowledgeCitationImageResolverService,
     @Inject(AUDIT_SERVICE) private readonly auditService: IAuditService,
-    private readonly importService: KnowledgeImportService,
     private readonly diagnosticsService: KnowledgeDiagnosticsService,
     private readonly graphService: KnowledgeGraphService,
     private readonly queryAuditRepo: KnowledgeQueryAuditRepo,
@@ -1080,46 +1073,6 @@ export class LlmWikiController {
       },
     });
     return { queuedPageCount: jobIds.length, jobIds };
-  }
-
-  @HttpCode(HttpStatus.OK)
-  @Post('admin/import-compile-result')
-  async importCompileResult(
-    @Body() dto: ImportCompileResultDto,
-    @AuthUser() user: User,
-    @AuthWorkspace() workspace: Workspace,
-  ) {
-    if (!this.chatService.isEnabledForWorkspace(workspace)) {
-      throw new ForbiddenException('AI knowledge chat is disabled');
-    }
-
-    this.assertAdmin(user, 'AI knowledge import is restricted to admins');
-
-    const result = await this.importService.importCompileResult({
-      input: {
-        workspaceId: workspace.id,
-        spaceId: dto.spaceId,
-        compilerVersion:
-          dto.compilerVersion ?? DEFAULT_KNOWLEDGE_COMPILER_VERSION,
-        promptVersion: dto.promptVersion ?? DEFAULT_KNOWLEDGE_PROMPT_VERSION,
-        sources: dto.sources,
-      },
-      artifacts: dto.artifacts,
-    });
-
-    this.auditService.log({
-      event: AuditEvent.KNOWLEDGE_IMPORT,
-      resourceType: AuditResource.KNOWLEDGE,
-      resourceId: dto.spaceId,
-      metadata: {
-        artifactCount: dto.artifacts.length,
-        sourceCount: dto.sources.length,
-        importedArtifactCount: result.importedArtifactCount,
-        quarantinedArtifactCount: result.quarantinedArtifactCount,
-      },
-    });
-
-    return result;
   }
 
   @HttpCode(HttpStatus.OK)
