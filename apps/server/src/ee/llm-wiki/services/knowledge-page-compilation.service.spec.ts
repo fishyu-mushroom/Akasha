@@ -80,11 +80,6 @@ describe('KnowledgePageCompilationService contract', () => {
       compileTaskId: 'original-task',
       chunks: [{ text: 'Page body' }],
     };
-    const pendingImport = {
-      acceptedArtifacts: [artifact],
-      quarantineInputs: [],
-      quarantinedArtifactCount: 0,
-    };
     const compiler = {
       compileSpace: jest.fn().mockResolvedValue({
         artifacts: [artifact],
@@ -101,9 +96,7 @@ describe('KnowledgePageCompilationService contract', () => {
     const compilationRepo = {
       startAttempt: jest.fn(),
       updateSourceSnapshot: jest.fn(),
-      findPendingImport: jest.fn().mockResolvedValue(pendingImport),
       updateStage: jest.fn(),
-      savePendingImport: jest.fn(),
       succeedAttempt: jest.fn(),
       failAttempt: jest.fn(),
       skipAttempt: jest.fn(),
@@ -151,7 +144,6 @@ describe('KnowledgePageCompilationService contract', () => {
       result: { compilerRunId: 'fresh-compiler-run' },
     });
 
-    expect(compilationRepo.findPendingImport).not.toHaveBeenCalled();
     expect(compiler.compileSpace).toHaveBeenCalled();
     expect(execution.catalog).toHaveBeenCalled();
     expect(importService.importCompileResult).toHaveBeenCalledWith(
@@ -159,9 +151,6 @@ describe('KnowledgePageCompilationService contract', () => {
         artifacts: [artifact],
       }),
     );
-    expect(
-      importService.importCompileResult.mock.calls[0][0],
-    ).not.toHaveProperty('preparedImport');
     expect(compilationRepo.succeedAttempt).toHaveBeenCalled();
     expect(execution.completePage).toHaveBeenCalledWith({
       status: 'succeeded',

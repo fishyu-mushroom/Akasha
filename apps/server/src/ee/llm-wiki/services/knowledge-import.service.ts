@@ -52,18 +52,6 @@ export type KnowledgeImportStage =
   | 'embedding'
   | 'import';
 
-export interface PreparedKnowledgeImport {
-  acceptedArtifacts: CompiledKnowledgeArtifact[];
-  quarantineInputs: Array<{
-    artifactId: string;
-    artifactKind: string | null;
-    compilerRunId: string | null;
-    compileTaskId: string | null;
-    reasonCodes: string[];
-  }>;
-  quarantinedArtifactCount: number;
-}
-
 type ArtifactChunk = NonNullable<CompiledKnowledgeArtifact['chunks']>[number];
 type EmbeddedArtifactChunk = Omit<ArtifactChunk, 'embedding'> & {
   embedding: KnowledgeEmbedding;
@@ -102,32 +90,23 @@ export class KnowledgeImportService {
     retireCompileScope?: boolean;
     publicationGuard?: (trx: KyselyTransaction) => Promise<boolean>;
     publicationComplete?: (trx: KyselyTransaction) => Promise<void>;
-    preparedImport?: PreparedKnowledgeImport;
-    onPrepared?: (prepared: PreparedKnowledgeImport) => void | Promise<void>;
   }): Promise<KnowledgeImportResult> {
     const operationBudget =
       input.input.operationBudget ?? new KnowledgeOperationBudget();
     input.input.operationBudget = operationBudget;
     operationBudget.throwIfAborted();
-    if (!input.preparedImport) await input.onStage?.('validation');
-    const validation = input.preparedImport
-      ? {
-          accepted: input.preparedImport.acceptedArtifacts,
-          quarantined: [],
-        }
-      : this.validator.validateCompileResult(input);
+    await input.onStage?.('validation');
+    const validation = this.validator.validateCompileResult(input);
     operationBudget.assertArtifactCount(validation.accepted.length);
     assertPublicationChunkBudgets(operationBudget, validation.accepted);
 
-    const quarantineInputs =
-      input.preparedImport?.quarantineInputs ??
-      validation.quarantined.map((quarantined) => ({
-        artifactId: quarantined.artifact.artifactId,
-        artifactKind: quarantined.artifact.artifactKind ?? null,
-        compilerRunId: quarantined.artifact.compilerRunId ?? null,
-        compileTaskId: quarantined.artifact.compileTaskId ?? null,
-        reasonCodes: toQuarantineReasonCodes(quarantined.reasons),
-      }));
+    const quarantineInputs = validation.quarantined.map((quarantined) => ({
+      artifactId: quarantined.artifact.artifactId,
+      artifactKind: quarantined.artifact.artifactKind ?? null,
+      compilerRunId: quarantined.artifact.compilerRunId ?? null,
+      compileTaskId: quarantined.artifact.compileTaskId ?? null,
+      reasonCodes: toQuarantineReasonCodes(quarantined.reasons),
+    }));
     const isSemanticPagePublication =
       input.input.compileMode === 'pages' && input.input.sources.length === 1;
     if (isSemanticPagePublication && quarantineInputs.length > 0) {
@@ -227,14 +206,6 @@ export class KnowledgeImportService {
           };
         }),
       };
-    }
-
-    if (!input.preparedImport) {
-      await input.onPrepared?.({
-        acceptedArtifacts: validation.accepted,
-        quarantineInputs,
-        quarantinedArtifactCount: validation.quarantined.length,
-      });
     }
 
     await input.onStage?.('embedding');
@@ -695,9 +666,7 @@ export class KnowledgeImportService {
 
     return {
       importedArtifactCount: validation.accepted.length,
-      quarantinedArtifactCount:
-        input.preparedImport?.quarantinedArtifactCount ??
-        validation.quarantined.length,
+      quarantinedArtifactCount: validation.quarantined.length,
       ...(degradedRetrievalProfiles.length > 0
         ? {
             degradedRetrievalProfiles: [
@@ -860,29 +829,6 @@ function assertPublicationChunkBudgets(
 
 function isTableRowChunk(chunk: ArtifactChunk): boolean {
   return chunk.stableKey?.startsWith('table-row:') === true;
-}
-
-export function parsePreparedKnowledgeImport(
-  value: JsonValue,
-): PreparedKnowledgeImport {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error('Pending knowledge import is invalid.');
-  }
-  const record = value as Record<string, unknown>;
-  if (
-    !Array.isArray(record.acceptedArtifacts) ||
-    !Array.isArray(record.quarantineInputs) ||
-    typeof record.quarantinedArtifactCount !== 'number'
-  ) {
-    throw new Error('Pending knowledge import is invalid.');
-  }
-  return value as unknown as PreparedKnowledgeImport;
-}
-
-export function serializePreparedKnowledgeImport(
-  value: PreparedKnowledgeImport,
-): JsonValue {
-  return toJsonValue(value);
 }
 
 function uniqueSourcePageIds(input: CompileSpaceInput): string[] {

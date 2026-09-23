@@ -12,7 +12,6 @@ import {
 export type KnowledgeSpaceCompileRunStatus =
   | 'queued'
   | 'compiling'
-  | 'aggregate_pending'
   | 'aggregating'
   | 'succeeded'
   | 'partial'
@@ -24,10 +23,8 @@ export type KnowledgeSpaceCompileRunMode = 'incremental' | 'force_rebuild';
 
 export type KnowledgeSpaceCompileRunPhase =
   | 'text'
-  | 'initial_aggregate'
   | 'images'
   | 'image_merge'
-  | 'final_aggregate'
   | 'finalizing'
   | 'complete';
 
@@ -122,7 +119,6 @@ export type KnowledgeSpaceCompileRunPageStatus =
 const NONTERMINAL_RUN_STATUSES: KnowledgeSpaceCompileRunStatus[] = [
   'queued',
   'compiling',
-  'aggregate_pending',
   'aggregating',
 ];
 
@@ -151,19 +147,13 @@ export class KnowledgeSpaceCompilationRepo {
         'spaceJobQueuedAt',
       ])
       .where('status', '=', 'queued')
-      .where('phase', 'in', [
-        'text',
-        'initial_aggregate',
-        'image_merge',
-        'final_aggregate',
-        'finalizing',
-      ])
+      .where('phase', 'in', ['text', 'image_merge', 'finalizing'])
       .where('spaceJobId', 'is', null)
       .orderBy(
         sql<number>`CASE
           WHEN trigger = ${KNOWLEDGE_MANUAL_PAGE_PUBLISH_TRIGGER}
-           AND phase IN ('text', 'initial_aggregate', 'finalizing') THEN 0
-          WHEN phase IN ('image_merge', 'final_aggregate', 'finalizing') THEN 1
+           AND phase IN ('text', 'finalizing') THEN 0
+          WHEN phase IN ('image_merge', 'finalizing') THEN 1
           ELSE 5
         END`,
         'asc',
@@ -189,20 +179,14 @@ export class KnowledgeSpaceCompilationRepo {
         'spaceJobQueuedAt',
       ])
       .where('status', '=', 'queued')
-      .where('phase', 'in', [
-        'text',
-        'initial_aggregate',
-        'image_merge',
-        'final_aggregate',
-        'finalizing',
-      ])
+      .where('phase', 'in', ['text', 'image_merge', 'finalizing'])
       .where('spaceJobId', 'is not', null)
       .where('spaceJobDispatchedAt', 'is', null)
       .orderBy(
         sql<number>`CASE
           WHEN trigger = ${KNOWLEDGE_MANUAL_PAGE_PUBLISH_TRIGGER}
-           AND phase IN ('text', 'initial_aggregate', 'finalizing') THEN 0
-          WHEN phase IN ('image_merge', 'final_aggregate', 'finalizing') THEN 1
+           AND phase IN ('text', 'finalizing') THEN 0
+          WHEN phase IN ('image_merge', 'finalizing') THEN 1
           ELSE 5
         END`,
         'asc',
@@ -233,8 +217,8 @@ export class KnowledgeSpaceCompilationRepo {
   }): Promise<boolean> {
     const phases =
       input.jobPhase === 'text'
-        ? (['text', 'initial_aggregate', 'finalizing'] as const)
-        : (['image_merge', 'final_aggregate', 'finalizing'] as const);
+        ? (['text', 'finalizing'] as const)
+        : (['image_merge', 'finalizing'] as const);
     const updated = await this.db
       .updateTable('knowledgeSpaceCompileRuns')
       .set({ spaceJobDispatchedAt: new Date(), updatedAt: new Date() })
@@ -820,9 +804,6 @@ export class KnowledgeSpaceCompilationRepo {
         expectedPageCount: 0,
         compilerVersion: versions.compilerVersion,
         promptVersion: versions.promptVersion,
-        catalogSnapshot: [] as JsonValue,
-        catalogHash: 'pending-initialization',
-        aggregateRequired: false,
         targetSourcePageIds: requestTargetSourcePageIds as JsonValue | null,
         queuedAt: now,
         spaceJobQueuedAt: now,
@@ -1010,9 +991,6 @@ export class KnowledgeSpaceCompilationRepo {
         skippedPageCount: 0,
         importedArtifactCount: 0,
         quarantinedArtifactCount: 0,
-        catalogSnapshot: [] as JsonValue,
-        catalogHash: 'pending-initialization',
-        aggregateRequired: false,
         aggregateJobId: null,
         aggregateStartedAt: null,
         startedAt: null,
@@ -1044,8 +1022,6 @@ export class KnowledgeSpaceCompilationRepo {
     trigger: string;
     compilerVersion: string;
     promptVersion: string;
-    catalogSnapshot: JsonValue;
-    catalogHash: string;
     sources: Array<{
       sourcePageId: string;
       sourceVersion: string;
@@ -1238,11 +1214,6 @@ export class KnowledgeSpaceCompilationRepo {
           lastSuccessfulEffectiveHash: null,
           lastSuccessfulSourceVersion: null,
           lastSuccessfulSourceHash: null,
-          pendingImport: null,
-          pendingSpaceId: null,
-          pendingSourceVersion: null,
-          pendingEffectiveKnowledgeHash: null,
-          pendingCreatedAt: null,
           errorCode: 'force_rebuild_reset',
           errorMessage: 'Compiled knowledge was cleared by a force rebuild.',
           updatedAt: now,
@@ -1266,13 +1237,6 @@ export class KnowledgeSpaceCompilationRepo {
             : input.sources.length,
           compilerVersion: input.compilerVersion,
           promptVersion: input.promptVersion,
-          catalogSnapshot: input.deferInitialization
-            ? ([] as JsonValue)
-            : input.catalogSnapshot,
-          catalogHash: input.deferInitialization
-            ? 'pending-initialization'
-            : input.catalogHash,
-          aggregateRequired: false,
           initializedAt: input.deferInitialization ? null : now,
           queuedAt: now,
           spaceJobQueuedAt: now,
@@ -1341,8 +1305,6 @@ export class KnowledgeSpaceCompilationRepo {
   }) {
     return this.forceResetAndCreateRun({
       ...input,
-      catalogSnapshot: [] as JsonValue,
-      catalogHash: 'pending-initialization',
       sources: [],
       deferInitialization: true,
     });

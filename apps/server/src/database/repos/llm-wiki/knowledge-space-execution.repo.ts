@@ -79,17 +79,11 @@ export const MERGE_ATTEMPT_BUDGET = 2;
 const NONTERMINAL_RUN_STATUSES: KnowledgeSpaceCompileRunStatus[] = [
   'queued',
   'compiling',
-  'aggregate_pending',
   'aggregating',
 ];
-const TEXT_PHASES: KnowledgeSpaceCompileRunPhase[] = [
-  'text',
-  'initial_aggregate',
-  'finalizing',
-];
+const TEXT_PHASES: KnowledgeSpaceCompileRunPhase[] = ['text', 'finalizing'];
 const IMAGE_MERGE_PHASES: KnowledgeSpaceCompileRunPhase[] = [
   'image_merge',
-  'final_aggregate',
   'finalizing',
 ];
 
@@ -480,19 +474,7 @@ export class KnowledgeSpaceExecutionRepo {
     return executeTx(this.db, async (trx) => {
       const run = await this.lockLeasedRun(trx, lease);
       if (!run) return undefined;
-      if (run.phase === 'finalizing' || run.phase === 'final_aggregate') {
-        if (run.phase === 'final_aggregate') {
-          await trx
-            .updateTable('knowledgeSpaceCompileRuns')
-            .set({
-              phase: 'finalizing',
-              status: 'aggregating',
-              updatedAt: new Date(),
-            })
-            .$call((query) => this.whereLease(query, lease))
-            .where('phase', '=', 'final_aggregate')
-            .execute();
-        }
+      if (run.phase === 'finalizing') {
         return { barrierComplete: true };
       }
       if (run.phase !== 'image_merge') return undefined;
@@ -596,12 +578,7 @@ export class KnowledgeSpaceExecutionRepo {
       const claimed = await trx
         .updateTable('knowledgeSpaceCompileRuns')
         .set({
-          status:
-            locked.phase === 'initial_aggregate' ||
-            locked.phase === 'final_aggregate' ||
-            locked.phase === 'finalizing'
-              ? 'aggregating'
-              : 'compiling',
+          status: locked.phase === 'finalizing' ? 'aggregating' : 'compiling',
           executionToken,
           executionLeaseExpiresAt: input.executionLeaseExpiresAt,
           workerId: input.workerId,
@@ -698,7 +675,6 @@ export class KnowledgeSpaceExecutionRepo {
     lease: SpaceExecutionLease,
     input: {
       targetSourcePageIds: string[] | null;
-      aggregateRequired?: boolean;
     },
   ) {
     return executeTx(this.db, async (trx) => {
@@ -764,7 +740,6 @@ export class KnowledgeSpaceExecutionRepo {
         .updateTable('knowledgeSpaceCompileRuns')
         .set({
           initializedAt: now,
-          aggregateRequired: input.aggregateRequired ?? false,
           expectedPageCount,
           succeededPageCount: 0,
           failedPageCount: 0,
@@ -1038,7 +1013,7 @@ export class KnowledgeSpaceExecutionRepo {
           ...counts,
         };
       }
-      if (!['text', 'initial_aggregate'].includes(run.phase)) return undefined;
+      if (run.phase !== 'text') return undefined;
       const barrierComplete =
         counts.succeeded + counts.failed + counts.skipped >=
         run.expectedPageCount;
@@ -1325,7 +1300,6 @@ export class KnowledgeSpaceExecutionRepo {
       errorMessage?: string | null;
       importedArtifactCount?: number;
       quarantinedArtifactCount?: number;
-      catalogHash?: string;
     } = {},
   ) {
     return executeTx(this.db, async (trx) => {
@@ -1345,9 +1319,6 @@ export class KnowledgeSpaceExecutionRepo {
             : {}),
           ...(input.quarantinedArtifactCount !== undefined
             ? { quarantinedArtifactCount: input.quarantinedArtifactCount }
-            : {}),
-          ...(input.catalogHash !== undefined
-            ? { catalogHash: input.catalogHash }
             : {}),
           executionToken: null,
           executionLeaseExpiresAt: null,
@@ -1384,9 +1355,6 @@ export class KnowledgeSpaceExecutionRepo {
             expectedPageCount: 0,
             compilerVersion: run.compilerVersion,
             promptVersion: run.promptVersion,
-            catalogSnapshot: [] as JsonValue,
-            catalogHash: 'pending-initialization',
-            aggregateRequired: false,
             // Page updates and snapshot changes that arrive after initialization
             // accumulate in a scope separate from the current Run's frozen plan.
             targetSourcePageIds: run.followUpTargetSourcePageIds,

@@ -91,7 +91,6 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       'finish-token',
     );
     const initialized = await executionRepo.initializeRun(lease, {
-      aggregateRequired: true,
       targetSourcePageIds: null,
     });
     expect(initialized?.initialized).toBe(true);
@@ -99,7 +98,6 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       executionRepo.initializeRun(
         { ...lease, executionToken: 'old-token' },
         {
-          aggregateRequired: true,
           targetSourcePageIds: null,
         },
       ),
@@ -187,10 +185,10 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       values ('space-plan-fast-path', 'workspace-1', 'Plan fast path');
       insert into knowledge_space_compile_runs (
         id, workspace_id, space_id, trigger, compiler_version, prompt_version,
-        catalog_hash, space_job_queued_at
+        space_job_queued_at
       ) values (
         'run-plan-fast-path', 'workspace-1', 'space-plan-fast-path', 'manual',
-        'compiler-v1', 'prompt-v1', 'pending-initialization', now()
+        'compiler-v1', 'prompt-v1', now()
       )
     `.execute(db);
     const lease = await claimedLease(
@@ -201,14 +199,12 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
     );
 
     await executionRepo.initializeRun(lease, {
-      aggregateRequired: false,
       targetSourcePageIds: null,
     });
 
     await expect(executionRepo.findLeasedRun(lease)).resolves.toEqual(
       expect.objectContaining({
         initializedAt: expect.any(Date),
-        aggregateRequired: false,
       }),
     );
   });
@@ -220,10 +216,10 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       values ('space-large-plan', 'workspace-1', 'Large plan');
       insert into knowledge_space_compile_runs (
         id, workspace_id, space_id, trigger, compiler_version, prompt_version,
-        catalog_hash, space_job_queued_at
+        space_job_queued_at
       ) values (
         'run-large-plan', 'workspace-1', 'space-large-plan', 'manual',
-        'compiler-v1', 'prompt-v1', 'pending-initialization', now()
+        'compiler-v1', 'prompt-v1', now()
       );
       insert into pages (id, workspace_id, space_id, updated_at)
       select 'large-page-' || ordinal, 'workspace-1', 'space-large-plan', now()
@@ -237,7 +233,6 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
     );
     await expect(
       executionRepo.initializeRun(lease, {
-        aggregateRequired: true,
         targetSourcePageIds: null,
       }),
     ).resolves.toEqual(expect.objectContaining({ initialized: true }));
@@ -306,7 +301,6 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
     );
 
     await executionRepo.initializeRun(lease, {
-      aggregateRequired: true,
       targetSourcePageIds: null,
     });
 
@@ -331,10 +325,10 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       values ('space-text-changed', 'workspace-1', 'Text changed');
       insert into knowledge_space_compile_runs (
         id, workspace_id, space_id, trigger, compiler_version, prompt_version,
-        catalog_hash, space_job_queued_at
+        space_job_queued_at
       ) values (
         'run-text-changed', 'workspace-1', 'space-text-changed', 'manual',
-        'compiler-v1', 'prompt-v1', 'pending-initialization', now()
+        'compiler-v1', 'prompt-v1', now()
       );
       insert into pages (id, workspace_id, space_id, updated_at)
       values ('changed-page', 'workspace-1', 'space-text-changed', now())
@@ -346,7 +340,6 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       'text-changed-token',
     );
     await executionRepo.initializeRun(lease, {
-      aggregateRequired: true,
       targetSourcePageIds: null,
     });
     await executionRepo.claimNextTextPage(lease);
@@ -396,10 +389,10 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       values ('space-multi-changed', 'workspace-1', 'Multi changed');
       insert into knowledge_space_compile_runs (
         id, workspace_id, space_id, trigger, compiler_version, prompt_version,
-        catalog_hash, space_job_queued_at
+        space_job_queued_at
       ) values (
         'run-multi-changed', 'workspace-1', 'space-multi-changed', 'manual',
-        'compiler-v1', 'prompt-v1', 'pending-initialization', now()
+        'compiler-v1', 'prompt-v1', now()
       );
       insert into pages (id, workspace_id, space_id, updated_at)
       values
@@ -413,7 +406,6 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       'multi-changed-token',
     );
     await executionRepo.initializeRun(lease, {
-      aggregateRequired: true,
       targetSourcePageIds: null,
     });
 
@@ -454,10 +446,10 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       values ('space-scoped-changed', 'workspace-1', 'Scoped changed');
       insert into knowledge_space_compile_runs (
         id, workspace_id, space_id, trigger, compiler_version, prompt_version,
-        catalog_hash, target_source_page_ids, space_job_queued_at
+        target_source_page_ids, space_job_queued_at
       ) values (
         'run-scoped-changed', 'workspace-1', 'space-scoped-changed', 'page_retry',
-        'compiler-v1', 'prompt-v1', 'pending-initialization',
+        'compiler-v1', 'prompt-v1',
         '["scoped-page-a", "scoped-page-b"]'::jsonb, now()
       );
       insert into pages (id, workspace_id, space_id, updated_at)
@@ -472,7 +464,6 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       'scoped-changed-token',
     );
     await executionRepo.initializeRun(lease, {
-      aggregateRequired: true,
       targetSourcePageIds: ['scoped-page-a', 'scoped-page-b'],
     });
     await executionRepo.claimNextTextPage(lease);
@@ -510,11 +501,11 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       values ('space-image-changed', 'workspace-1', 'Image changed');
       insert into knowledge_space_compile_runs (
         id, workspace_id, space_id, trigger, compiler_version, prompt_version,
-        catalog_hash, target_source_page_ids, phase, initialized_at,
+        target_source_page_ids, phase, initialized_at,
         expected_page_count, succeeded_page_count, space_job_queued_at
       ) values (
         'run-image-changed', 'workspace-1', 'space-image-changed', 'page_retry',
-        'compiler-v1', 'prompt-v1', 'pending-initialization',
+        'compiler-v1', 'prompt-v1',
         '["image-page-a", "image-page-b"]'::jsonb, 'image_merge', now(),
         1, 1, now()
       );
@@ -602,7 +593,6 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       'yield-token',
     );
     await executionRepo.initializeRun(lease, {
-      aggregateRequired: true,
       targetSourcePageIds: null,
     });
     await executionRepo.claimNextTextPage(lease);
@@ -678,10 +668,10 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       values ('space-recovery-race', 'workspace-1', 'Recovery race');
       insert into knowledge_space_compile_runs (
         id, workspace_id, space_id, trigger, compiler_version, prompt_version,
-        catalog_hash, space_job_queued_at
+        space_job_queued_at
       ) values (
         'run-recovery-race', 'workspace-1', 'space-recovery-race', 'manual',
-        'compiler-v1', 'prompt-v1', 'pending-initialization', now()
+        'compiler-v1', 'prompt-v1', now()
       )
     `.execute(db);
     const liveLease = await claimedLease(
@@ -888,11 +878,11 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       values ('space-overlap', 'workspace-1', 'Overlap');
       insert into knowledge_space_compile_runs (
         id, workspace_id, space_id, trigger, compiler_version, prompt_version,
-        catalog_hash, space_job_queued_at, phase, status, initialized_at,
+        space_job_queued_at, phase, status, initialized_at,
         expected_page_count
       ) values (
         'run-overlap', 'workspace-1', 'space-overlap', 'manual', 'compiler-v1',
-        'prompt-v1', 'overlap', now(), 'text', 'queued', now(), 2
+        'prompt-v1', now(), 'text', 'queued', now(), 2
       );
       insert into knowledge_space_compile_run_pages (
         id, run_id, workspace_id, space_id, source_page_id,
@@ -1251,11 +1241,8 @@ async function createFixture(db: Kysely<unknown>): Promise<void> {
       skipped_page_count integer not null default 0,
       compiler_version varchar not null,
       prompt_version varchar not null,
-      catalog_snapshot jsonb not null default '[]',
-      catalog_hash varchar not null,
       target_source_page_ids jsonb,
       follow_up_target_source_page_ids jsonb,
-      aggregate_required boolean not null default true,
       aggregate_job_id varchar,
       aggregate_started_at timestamptz,
       imported_artifact_count integer not null default 0,
@@ -1289,7 +1276,7 @@ async function createFixture(db: Kysely<unknown>): Promise<void> {
     );
     create unique index uq_active_space_run
       on knowledge_space_compile_runs (workspace_id, space_id)
-      where status in ('queued','compiling','aggregate_pending','aggregating');
+      where status in ('queued','compiling','aggregating');
     create table knowledge_space_compile_run_pages (
       id varchar primary key default ('run-page-' || nextval('run_page_seq')),
       run_id varchar not null,
@@ -1408,36 +1395,36 @@ async function createFixture(db: Kysely<unknown>): Promise<void> {
       ('yield-page-2', 'workspace-1', 'space-yield');
     insert into knowledge_space_compile_runs (
       id, workspace_id, space_id, trigger, compiler_version, prompt_version,
-      catalog_hash, space_job_queued_at
+      space_job_queued_at
     ) values
       ('run-text', 'workspace-1', 'space-text', 'manual', 'compiler-v1',
-       'prompt-v1', 'pending-initialization', now()),
+       'prompt-v1', now()),
       ('run-finish', 'workspace-1', 'space-finish', 'manual', 'compiler-v1',
-       'prompt-v1', 'pending-initialization', now()),
+       'prompt-v1', now()),
       ('run-yield', 'workspace-1', 'space-yield', 'manual', 'compiler-v1',
-       'prompt-v1', 'pending-initialization', now()),
+       'prompt-v1', now()),
       ('run-recovery', 'workspace-1', 'space-recovery', 'manual', 'compiler-v1',
-       'prompt-v1', 'pending-initialization', now()),
+       'prompt-v1', now()),
       ('run-retire', 'workspace-1', 'space-retire', 'manual', 'compiler-v1',
-       'prompt-v1', 'pending-initialization', now()),
+       'prompt-v1', now()),
       ('run-force', 'workspace-1', 'space-force', 'manual', 'compiler-v1',
-       'prompt-v1', 'pending-initialization', now()),
+       'prompt-v1', now()),
       ('run-images', 'workspace-1', 'space-images', 'manual', 'compiler-v1',
-       'prompt-v1', 'images', now()),
+       'prompt-v1', now()),
       ('run-merge', 'workspace-1', 'space-merge', 'manual', 'compiler-v1',
-       'prompt-v1', 'merge', now()),
+       'prompt-v1', now()),
       ('run-claim', 'workspace-1', 'space-claim', 'manual', 'compiler-v1',
-       'prompt-v1', 'claim', now()),
+       'prompt-v1', now()),
       ('run-settle', 'workspace-1', 'space-settle', 'manual', 'compiler-v1',
-       'prompt-v1', 'settle', now()),
+       'prompt-v1', now()),
       ('run-spent', 'workspace-1', 'space-spent', 'manual', 'compiler-v1',
-       'prompt-v1', 'spent', now()),
+       'prompt-v1', now()),
       ('run-perm', 'workspace-1', 'space-perm', 'manual', 'compiler-v1',
-       'prompt-v1', 'perm', now()),
+       'prompt-v1', now()),
       ('run-msettle', 'workspace-1', 'space-msettle', 'manual', 'compiler-v1',
-       'prompt-v1', 'msettle', now()),
+       'prompt-v1', now()),
       ('run-mspent', 'workspace-1', 'space-mspent', 'manual', 'compiler-v1',
-       'prompt-v1', 'mspent', now());
+       'prompt-v1', now());
     update knowledge_space_compile_runs
       set phase='images', status='compiling', initialized_at=now(),
           expected_page_count=1

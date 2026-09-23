@@ -5,7 +5,6 @@ import { KnowledgeArtifactValidatorService } from './knowledge-artifact-validato
 import {
   KnowledgeCompilationValidationError,
   KnowledgeImportService,
-  PreparedKnowledgeImport,
 } from './knowledge-import.service';
 import { KnowledgeEmbeddingError } from './knowledge-embedding-provider.service';
 import { CompileSpaceInput } from '../types/compiler-artifact.types';
@@ -376,7 +375,7 @@ describe('KnowledgeImportService', () => {
     );
   });
 
-  it('keeps compiled page output unpublished and rematerializes current contributions before retrying embedding', async () => {
+  it('keeps compiled page output unpublished when embedding fails', async () => {
     const artifact = {
       artifactId: '11111111-1111-4111-8111-111111111111',
       workspaceId: 'workspace-1',
@@ -401,13 +400,6 @@ describe('KnowledgeImportService', () => {
       ],
       chunks: [{ text: 'Prepared knowledge chunk.' }],
     };
-    const refreshedArtifact = {
-      ...artifact,
-      title: 'Prepared page with latest shared knowledge',
-      contentMarkdown: '# Prepared page\n\nLatest shared knowledge.',
-      sourcePageIds: ['source-1', 'source-2'],
-      chunks: [{ text: 'Latest shared knowledge chunk.' }],
-    };
     const validator = {
       validateCompileResult: jest.fn().mockReturnValue({
         accepted: [artifact],
@@ -415,27 +407,19 @@ describe('KnowledgeImportService', () => {
       }),
     };
     const materializer = {
-      materializeSourceUpdate: jest
-        .fn()
-        .mockResolvedValueOnce({
-          artifacts: [artifact],
-          removedArtifactIds: [],
-        })
-        .mockResolvedValueOnce({
-          artifacts: [refreshedArtifact],
-          removedArtifactIds: [],
-        }),
+      materializeSourceUpdate: jest.fn().mockResolvedValueOnce({
+        artifacts: [artifact],
+        removedArtifactIds: [],
+      }),
     };
     const embeddingProvider = {
-      embedRequired: jest
-        .fn()
-        .mockRejectedValueOnce(
-          new KnowledgeEmbeddingError(
-            'embedding_provider_error',
-            'Knowledge embedding provider request failed.',
-            true,
-          ),
+      embedRequired: jest.fn().mockRejectedValueOnce(
+        new KnowledgeEmbeddingError(
+          'embedding_provider_error',
+          'Knowledge embedding provider request failed.',
+          true,
         ),
+      ),
       embedQuery: jest.fn(),
     };
     const capsuleRepo = {
@@ -443,14 +427,8 @@ describe('KnowledgeImportService', () => {
       markArtifactsStaleByIds: jest.fn(),
       upsertCompiledArtifacts: jest.fn(),
     };
-    const latestContribution = {
-      artifactId: artifact.artifactId,
-      sourcePageId: 'source-2',
-    };
     const contributionRepo = createContributionRepo();
-    contributionRepo.findByArtifactIds
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([latestContribution]);
+    contributionRepo.findByArtifactIds.mockResolvedValueOnce([]);
     const service = new KnowledgeImportService(
       {
         upsertPageSource: jest.fn().mockResolvedValue({ id: 'source-row-1' }),
@@ -465,60 +443,16 @@ describe('KnowledgeImportService', () => {
       contributionRepo as never,
       materializer as never,
     );
-    let prepared: PreparedKnowledgeImport | undefined;
 
     await expect(
       service.importCompileResult({
         input: { ...compileInput(), compileMode: 'pages' },
         artifacts: [artifact],
-        onPrepared: (value) => {
-          prepared = value;
-        },
       }),
     ).rejects.toMatchObject({ code: 'embedding_provider_error' });
 
-    expect(prepared).toEqual({
-      acceptedArtifacts: [artifact],
-      quarantineInputs: [],
-      quarantinedArtifactCount: 0,
-    });
     expect(capsuleRepo.upsertCompiledArtifacts).not.toHaveBeenCalled();
     expect(contributionRepo.replaceSourceContributions).not.toHaveBeenCalled();
-
-    embeddingProvider.embedRequired.mockResolvedValue(testEmbedding());
-    await expect(
-      service.importCompileResult({
-        input: { ...compileInput(), compileMode: 'pages' },
-        artifacts: [artifact],
-        preparedImport: prepared!,
-      }),
-    ).resolves.toMatchObject({ importedArtifactCount: 1 });
-
-    expect(validator.validateCompileResult).toHaveBeenCalledTimes(1);
-    expect(materializer.materializeSourceUpdate).toHaveBeenCalledTimes(2);
-    expect(materializer.materializeSourceUpdate).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        incomingArtifacts: [artifact],
-        affectedContributions: [latestContribution],
-      }),
-    );
-    expect(embeddingProvider.embedRequired).toHaveBeenCalledTimes(2);
-    expect(capsuleRepo.upsertCompiledArtifacts).toHaveBeenCalledWith(
-      [
-        expect.objectContaining({
-          page: expect.objectContaining({
-            title: refreshedArtifact.title,
-            body: refreshedArtifact.contentMarkdown,
-          }),
-          chunks: [
-            expect.objectContaining({
-              text: 'Latest shared knowledge chunk.',
-            }),
-          ],
-        }),
-      ],
-      expect.anything(),
-    );
   });
 
   it('publishes textual knowledge with an exact-search warning when HNSW cannot be created', async () => {
