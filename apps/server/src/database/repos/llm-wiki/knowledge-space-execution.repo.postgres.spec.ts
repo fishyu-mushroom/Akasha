@@ -849,7 +849,7 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
     );
   });
 
-  it('keeps a merge failure terminal while later pages finish', async () => {
+  it('reclaims a retryable merge failure and closes only once the budget is spent', async () => {
     const lease = await claimedLease(
       compilationRepo,
       executionRepo,
@@ -857,6 +857,8 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       'msettle-token',
     );
 
+    // A retryable failure with attempts left is not terminal yet: it keeps its
+    // prior quality (not partial_image) and does not exhaust its budget.
     const settlement = await executionRepo.failMergePage(lease, {
       sourcePageId: 'msettle-page-retry',
       sourceVersion: 'v1',
@@ -864,24 +866,18 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       retryable: true,
       errorCode: 'provider_unavailable',
     });
-
     expect(settlement).toEqual({ barrierComplete: false });
-    const page = await pageColumns(db, 'run-page-msettle-retry');
-    expect(page).toEqual(
+    await expect(pageColumns(db, 'run-page-msettle-retry')).resolves.toEqual(
       expect.objectContaining({
         mergeStatus: 'failed',
         errorCode: 'provider_unavailable',
         mergeAttemptCount: 1,
-        qualityStatus: 'partial_image',
+        qualityStatus: 'degraded',
       }),
     );
-    await expect(executionRepo.hasPartialOutcome(lease)).resolves.toBe(true);
-    await expect(executionRepo.claimNextMergePage(lease)).resolves.toEqual([
-      expect.objectContaining({
-        sourcePageId: 'msettle-page-ok',
-        mergeAttemptCount: 1,
-      }),
-    ]);
+
+    // A sibling page finishing must not close the barrier while a reclaimable
+    // failure is still outstanding.
     await expect(
       executionRepo.completeMergePagePublication(lease, {
         sourcePageId: 'msettle-page-ok',
@@ -889,20 +885,58 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
         sourceContentHash: 'sha256:msettle-page-ok',
         effectiveKnowledgeHash: 'sha256:msettle-page-ok-with-images',
       }),
+    ).resolves.toEqual({ barrierComplete: false });
+    await expect(executionRepo.findLeasedRun(lease)).resolves.toEqual(
+      expect.objectContaining({ phase: 'image_merge' }),
+    );
+
+    // The barrier reclaims the retryable failure for another attempt.
+    await expect(executionRepo.advanceMergeBarrier(lease)).resolves.toEqual({
+      barrierComplete: false,
+      reclaimed: true,
+    });
+    await expect(pageColumns(db, 'run-page-msettle-retry')).resolves.toEqual(
+      expect.objectContaining({
+        mergeStatus: 'pending',
+        errorCode: null,
+        mergeAttemptCount: 1,
+      }),
+    );
+
+    // Claiming the reclaimed page spends its final attempt.
+    await expect(executionRepo.claimNextMergePage(lease)).resolves.toEqual([
+      expect.objectContaining({
+        sourcePageId: 'msettle-page-retry',
+        mergeAttemptCount: 2,
+      }),
+    ]);
+
+    // The second failure exhausts the budget: now terminal, partial_image, and
+    // the barrier completes.
+    await expect(
+      executionRepo.failMergePage(lease, {
+        sourcePageId: 'msettle-page-retry',
+        sourceVersion: 'v1',
+        sourceContentHash: 'sha256:msettle-page-retry',
+        retryable: true,
+        errorCode: 'provider_unavailable',
+      }),
     ).resolves.toEqual({ barrierComplete: true });
     await expect(pageColumns(db, 'run-page-msettle-retry')).resolves.toEqual(
       expect.objectContaining({
         mergeStatus: 'failed',
-        mergeAttemptCount: 1,
+        mergeAttemptCount: 2,
+        qualityStatus: 'partial_image',
       }),
     );
+    await expect(executionRepo.hasPartialOutcome(lease)).resolves.toBe(true);
     await expect(executionRepo.claimNextMergePage(lease)).resolves.toEqual([]);
     await expect(executionRepo.findLeasedRun(lease)).resolves.toEqual(
       expect.objectContaining({ phase: 'finalizing' }),
     );
   });
 
-  it('closes the merge phase when its final pending page fails', async () => {
+  it('ends a merge page immediately when the failure is not retryable', async () => {
     const lease = await claimedLease(
       compilationRepo,
       executionRepo,
@@ -910,22 +944,28 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       'mspent-token',
     );
 
+    // A non-retryable failure is terminal on the first attempt: its budget is
+    // forced to the ceiling so the barrier never reclaims it.
     const barrier = await executionRepo.failMergePage(lease, {
       sourcePageId: 'mspent-page',
       sourceVersion: 'v1',
       sourceContentHash: 'sha256:mspent-page',
-      retryable: true,
-      errorCode: 'provider_unavailable',
+      retryable: false,
+      errorCode: 'input_too_large',
     });
 
     expect(barrier).toEqual({ barrierComplete: true });
     await expect(pageColumns(db, 'run-page-mspent')).resolves.toEqual(
       expect.objectContaining({
         mergeStatus: 'failed',
+        mergeAttemptCount: 2,
         qualityStatus: 'partial_image',
       }),
     );
     await expect(executionRepo.hasPartialOutcome(lease)).resolves.toBe(true);
+    await expect(executionRepo.advanceMergeBarrier(lease)).resolves.toEqual({
+      barrierComplete: true,
+    });
     await expect(executionRepo.findLeasedRun(lease)).resolves.toEqual(
       expect.objectContaining({ phase: 'finalizing' }),
     );

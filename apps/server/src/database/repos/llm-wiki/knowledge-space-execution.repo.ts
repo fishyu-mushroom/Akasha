@@ -67,6 +67,11 @@ export interface RunImageInitializationPlan {
 
 export const PAGE_ATTEMPT_BUDGET = 2;
 
+// Image merge gets the same budget as text: one initial attempt plus one
+// retry. A transient provider/embedding/DB failure during merge should not end
+// the page the way a permanent (non-retryable) failure does.
+export const MERGE_ATTEMPT_BUDGET = 2;
+
 const NONTERMINAL_RUN_STATUSES: KnowledgeSpaceCompileRunStatus[] = [
   'queued',
   'compiling',
@@ -455,18 +460,7 @@ export class KnowledgeSpaceExecutionRepo {
       .where('id', '=', page.id)
       .where('mergeStatus', 'in', ['pending', 'queued', 'running'])
       .execute();
-    const remaining = await trx
-      .selectFrom('knowledgeSpaceCompileRunPages')
-      .select('id')
-      .where('runId', '=', lease.runId)
-      .where('mergeStatus', 'in', [
-        'waiting_images',
-        'pending',
-        'queued',
-        'running',
-      ])
-      .limit(1)
-      .executeTakeFirst();
+    const remaining = await this.hasOutstandingMergeWork(trx, lease.runId);
     if (!remaining) {
       await trx
         .updateTable('knowledgeSpaceCompileRuns')
@@ -502,7 +496,7 @@ export class KnowledgeSpaceExecutionRepo {
         return { barrierComplete: true };
       }
       if (run.phase !== 'image_merge') return undefined;
-      const remaining = await trx
+      const active = await trx
         .selectFrom('knowledgeSpaceCompileRunPages')
         .select('id')
         .where('runId', '=', lease.runId)
@@ -514,19 +508,53 @@ export class KnowledgeSpaceExecutionRepo {
         ])
         .limit(1)
         .executeTakeFirst();
-      if (remaining) return { barrierComplete: false };
+      if (active) return { barrierComplete: false, reclaimed: false };
+      // No page is actively merging. Before closing the barrier, give retryable
+      // failures another attempt (mirrors advanceTextBarrier's reclaim). A
+      // non-retryable failure already had its attempt count forced to the budget
+      // by finishMergePage, so it is excluded here and stays terminal.
+      const now = new Date();
+      const reclaimed = await trx
+        .updateTable('knowledgeSpaceCompileRunPages')
+        .set({
+          mergeStatus: 'pending',
+          errorCode: null,
+          errorMessage: null,
+          updatedAt: now,
+        })
+        .where('runId', '=', lease.runId)
+        .where('mergeStatus', '=', 'failed')
+        .where('mergeAttemptCount', '<', MERGE_ATTEMPT_BUDGET)
+        .returning('id')
+        .execute();
+      if (reclaimed.length > 0) {
+        // Keep the run in image_merge and hand control back to the runner so it
+        // re-claims the reclaimed pages for another attempt.
+        const held = await trx
+          .updateTable('knowledgeSpaceCompileRuns')
+          .set({ updatedAt: now })
+          .$call((query) => this.whereLease(query, lease))
+          .where('phase', '=', 'image_merge')
+          .returning('id')
+          .executeTakeFirst();
+        return held
+          ? { barrierComplete: false, reclaimed: true }
+          : undefined;
+      }
       const updated = await trx
         .updateTable('knowledgeSpaceCompileRuns')
         .set({
           phase: 'finalizing',
           status: 'aggregating',
-          updatedAt: new Date(),
+          updatedAt: now,
         })
         .$call((query) => this.whereLease(query, lease))
         .where('phase', '=', 'image_merge')
         .returning('id')
         .executeTakeFirst();
-      return updated ? { barrierComplete: true } : undefined;
+      return updated
+        ? { barrierComplete: true, reclaimed: false }
+        : undefined;
     });
   }
 
@@ -1371,6 +1399,37 @@ export class KnowledgeSpaceExecutionRepo {
     });
   }
 
+  // Merge work that still blocks the barrier: pages actively being merged, plus
+  // failed pages that are still eligible for a retry. Treating the latter as
+  // outstanding stops finishMergePage/completeMergePagePublication from flipping
+  // the run to `finalizing` before advanceMergeBarrier can reclaim them.
+  private async hasOutstandingMergeWork(
+    trx: KyselyTransaction,
+    runId: string,
+  ): Promise<boolean> {
+    const row = await trx
+      .selectFrom('knowledgeSpaceCompileRunPages')
+      .select('id')
+      .where('runId', '=', runId)
+      .where((expression) =>
+        expression.or([
+          expression('mergeStatus', 'in', [
+            'pending',
+            'queued',
+            'running',
+            'waiting_images',
+          ]),
+          expression.and([
+            expression('mergeStatus', '=', 'failed'),
+            expression('mergeAttemptCount', '<', MERGE_ATTEMPT_BUDGET),
+          ]),
+        ]),
+      )
+      .limit(1)
+      .executeTakeFirst();
+    return Boolean(row);
+  }
+
   private async finishMergePage(
     lease: SpaceExecutionLease,
     input: {
@@ -1399,14 +1458,28 @@ export class KnowledgeSpaceExecutionRepo {
         .executeTakeFirst();
       if (!page) return undefined;
       if (!['succeeded', 'skipped', 'failed'].includes(page.mergeStatus)) {
+        // A retryable failure that still has attempts left is not terminal: it
+        // will be reclaimed by advanceMergeBarrier once the barrier settles, so
+        // we must not brand the page partial_image or exhaust its budget yet. A
+        // non-retryable failure ends the page now, so force its attempt count to
+        // the budget the same way completeTextPage does — this keeps the reclaim
+        // predicate a single "failed AND under budget" check.
+        const terminalFailure =
+          input.status === 'failed' &&
+          (input.retryable === false ||
+            page.mergeAttemptCount >= MERGE_ATTEMPT_BUDGET);
+        const terminal = input.status !== 'failed' || terminalFailure;
         await trx
           .updateTable('knowledgeSpaceCompileRunPages')
           .set({
             mergeStatus: input.status,
             mergedEffectiveKnowledgeHash: input.effectiveKnowledgeHash ?? null,
-            ...(input.status === 'succeeded'
+            ...(input.status === 'succeeded' || !terminal
               ? {}
               : { qualityStatus: 'partial_image' as const }),
+            ...(input.status === 'failed' && input.retryable === false
+              ? { mergeAttemptCount: MERGE_ATTEMPT_BUDGET }
+              : {}),
             errorCode: diagnostic(input.errorCode, 80),
             errorMessage: diagnostic(input.errorMessage, 500),
             updatedAt: new Date(),
@@ -1414,19 +1487,10 @@ export class KnowledgeSpaceExecutionRepo {
           .where('id', '=', page.id)
           .execute();
       }
-      const remaining = await trx
-        .selectFrom('knowledgeSpaceCompileRunPages')
-        .select('id')
-        .where('runId', '=', lease.runId)
-        .where('mergeStatus', 'in', [
-          'pending',
-          'queued',
-          'running',
-          'waiting_images',
-        ])
-        .limit(1)
-        .executeTakeFirst();
-      const barrierComplete = !remaining;
+      const barrierComplete = !(await this.hasOutstandingMergeWork(
+        trx,
+        lease.runId,
+      ));
       const updated = await trx
         .updateTable('knowledgeSpaceCompileRuns')
         .set({
