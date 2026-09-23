@@ -663,14 +663,6 @@ export class KnowledgeSpaceCompilationRepo {
     });
   }
 
-  async requestRunsForSourcePages(
-    input: Parameters<
-      KnowledgeSpaceCompilationRepo['requestIncrementalCompileForPages']
-    >[0],
-  ) {
-    return this.requestIncrementalCompileForPages(input);
-  }
-
   private async requestRunInTx(
     trx: KyselyTransaction,
     request: SpaceRunRequest,

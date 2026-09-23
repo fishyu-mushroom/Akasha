@@ -66,7 +66,7 @@ describe('KnowledgeImportService', () => {
     expect(capsuleRepo.upsertCompiledArtifacts).not.toHaveBeenCalled();
   });
 
-  it('allows more than 200 chunks when the source page contains a table', async () => {
+  it('does not let an unrelated table node disable the ordinary chunk limit', async () => {
     const artifact = {
       artifactId: 'artifact-table',
       workspaceId: 'workspace-1',
@@ -120,8 +120,125 @@ describe('KnowledgeImportService', () => {
         artifacts: [artifact],
         upsertSources: false,
       }),
+    ).rejects.toMatchObject({
+      code: 'page_complexity_limit',
+      limitKind: 'chunks',
+    });
+    expect(capsuleRepo.upsertCompiledArtifacts).not.toHaveBeenCalled();
+  });
+
+  it('keeps 1,000 table rows as independently retrievable bounded chunks', async () => {
+    const artifact = {
+      artifactId: 'artifact-table',
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      title: 'Table page',
+      contentMarkdown: '# Table page',
+      sourcePageIds: ['source-1'],
+      artifactKind: 'source_summary' as const,
+      compilerVersion: 'compiler@1',
+      promptVersion: 'prompt@1',
+      chunks: Array.from({ length: 1_000 }, (_, index) => ({
+        text: `Table page Table row ${index + 1}: service=service-${index}`,
+        stableKey: `table-row:source-1:0:${index}`,
+        embeddingText: `Table page Table row ${index + 1}: service=service-${index}`,
+      })),
+    };
+    const capsuleRepo = {
+      markCompileScopeStale: jest.fn().mockResolvedValue(undefined),
+      upsertCompiledArtifacts: jest.fn().mockResolvedValue(undefined),
+    };
+    const embeddingProvider = {
+      embedManyRequired: jest.fn(async (texts: string[]) =>
+        texts.map(() => testEmbedding()),
+      ),
+    };
+    const service = new KnowledgeImportService(
+      {} as KnowledgeSourceRepo,
+      capsuleRepo as unknown as KnowledgeCapsuleRepo,
+      {
+        validateCompileResult: jest.fn().mockReturnValue({
+          accepted: [artifact],
+          quarantined: [],
+        }),
+      } as unknown as KnowledgeArtifactValidatorService,
+      embeddingProvider as never,
+      {} as never,
+      createTransactionDb() as never,
+      { ensureProfileIndex: jest.fn().mockResolvedValue('created') } as never,
+      createContributionRepo() as never,
+      createMaterializer() as never,
+    );
+
+    await expect(
+      service.importCompileResult({
+        input: compileInput(),
+        artifacts: [artifact],
+        upsertSources: false,
+      }),
     ).resolves.toMatchObject({ importedArtifactCount: 1 });
-    expect(capsuleRepo.upsertCompiledArtifacts).toHaveBeenCalled();
+    expect(
+      capsuleRepo.upsertCompiledArtifacts.mock.calls[0][0][0].chunks,
+    ).toHaveLength(1_000);
+    expect(embeddingProvider.embedManyRequired).toHaveBeenCalledTimes(100);
+    expect(
+      Math.max(
+        ...embeddingProvider.embedManyRequired.mock.calls.map(
+          ([texts]) => texts.length,
+        ),
+      ),
+    ).toBe(10);
+  });
+
+  it('rejects table row chunks above the independent 2,000-row budget', async () => {
+    const artifact = {
+      artifactId: 'artifact-table-too-large',
+      workspaceId: 'workspace-1',
+      spaceId: 'space-1',
+      title: 'Oversized table',
+      contentMarkdown: '# Oversized table',
+      sourcePageIds: ['source-1'],
+      artifactKind: 'source_summary' as const,
+      compilerVersion: 'compiler@1',
+      promptVersion: 'prompt@1',
+      chunks: Array.from({ length: 2_001 }, (_, index) => ({
+        text: `row-${index}`,
+        stableKey: `table-row:0:${index}`,
+      })),
+    };
+    const capsuleRepo = { upsertCompiledArtifacts: jest.fn() };
+    const embeddingProvider = { embedManyRequired: jest.fn() };
+    const service = new KnowledgeImportService(
+      {} as KnowledgeSourceRepo,
+      capsuleRepo as unknown as KnowledgeCapsuleRepo,
+      {
+        validateCompileResult: jest.fn().mockReturnValue({
+          accepted: [artifact],
+          quarantined: [],
+        }),
+      } as unknown as KnowledgeArtifactValidatorService,
+      embeddingProvider as never,
+      {} as never,
+      createTransactionDb() as never,
+      {} as never,
+      createContributionRepo() as never,
+      createMaterializer() as never,
+    );
+
+    await expect(
+      service.importCompileResult({
+        input: compileInput(),
+        artifacts: [artifact],
+        upsertSources: false,
+      }),
+    ).rejects.toMatchObject({
+      code: 'page_complexity_limit',
+      limitKind: 'table_rows',
+      limit: 2_000,
+      actual: 2_001,
+    });
+    expect(embeddingProvider.embedManyRequired).not.toHaveBeenCalled();
+    expect(capsuleRepo.upsertCompiledArtifacts).not.toHaveBeenCalled();
   });
 
   it('embeds imported chunks when compiler artifacts do not include embeddings', async () => {
@@ -145,7 +262,11 @@ describe('KnowledgeImportService', () => {
           contentHash: 'hash-1',
         },
       ],
-      chunks: [{ text: 'Chaterm Flutter uses layered modules.' }],
+      chunks: [
+        { text: 'Chaterm Flutter uses layered modules.' },
+        { text: 'Akasha indexes knowledge rows.' },
+        { text: 'Batching reduces provider round trips.' },
+      ],
     };
     const sourceRepo = {
       upsertPageSource: jest.fn().mockResolvedValue({ id: 'source-row-1' }),
@@ -164,12 +285,14 @@ describe('KnowledgeImportService', () => {
       }),
     };
     const embeddingProvider = {
-      embedQuery: jest.fn().mockResolvedValue({
-        vector: [0.12, 0.34, 0.56],
-        profile: 'a'.repeat(64),
-        model: 'bge-m3',
-        dimensions: 3,
-      }),
+      embedManyRequired: jest.fn(async (texts: string[]) =>
+        texts.map(() => ({
+          vector: [0.12, 0.34, 0.56],
+          profile: 'a'.repeat(64),
+          model: 'bge-m3',
+          dimensions: 3,
+        })),
+      ),
     };
     const quarantineRepo = {
       recordQuarantinedArtifacts: jest.fn().mockResolvedValue(undefined),
@@ -194,13 +317,16 @@ describe('KnowledgeImportService', () => {
       artifacts: [artifact],
     });
 
-    expect(embeddingProvider.embedQuery).toHaveBeenCalledWith(
+    expect(embeddingProvider.embedManyRequired).toHaveBeenCalledTimes(1);
+    expect(embeddingProvider.embedManyRequired).toHaveBeenCalledWith([
       'Chaterm Flutter uses layered modules.',
-    );
+      'Akasha indexes knowledge rows.',
+      'Batching reduces provider round trips.',
+    ]);
     expect(capsuleRepo.upsertCompiledArtifacts).toHaveBeenCalledWith(
       [
         expect.objectContaining({
-          chunks: [
+          chunks: expect.arrayContaining([
             expect.objectContaining({
               text: 'Chaterm Flutter uses layered modules.',
               embedding: '[0.12,0.34,0.56]',
@@ -209,7 +335,15 @@ describe('KnowledgeImportService', () => {
               embeddingModel: 'bge-m3',
               embeddingDimensions: 3,
             }),
-          ],
+            expect.objectContaining({
+              text: 'Akasha indexes knowledge rows.',
+              embedding: '[0.12,0.34,0.56]',
+            }),
+            expect.objectContaining({
+              text: 'Batching reduces provider round trips.',
+              embedding: '[0.12,0.34,0.56]',
+            }),
+          ]),
         }),
       ],
       expect.anything(),

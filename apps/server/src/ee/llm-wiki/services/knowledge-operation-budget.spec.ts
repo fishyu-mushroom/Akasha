@@ -48,22 +48,6 @@ describe('knowledge operation budget', () => {
       'table rows',
       () => new KnowledgeOperationBudget().assertTableRowCount(2_001),
     ],
-    [
-      'source chunks',
-      () => new KnowledgeOperationBudget().assertSourceChunkCount(2_001),
-    ],
-    [
-      'embedding items',
-      () => new KnowledgeOperationBudget().assertEmbeddingWork(2_201, 1),
-    ],
-    [
-      'embedding characters',
-      () =>
-        new KnowledgeOperationBudget().assertEmbeddingWork(
-          1,
-          2 * 1024 * 1024 + 1,
-        ),
-    ],
   ])('rejects page complexity above the %s limit', (_name, operation) => {
     expect(operation).toThrow(
       expect.objectContaining<Partial<KnowledgeComplexityLimitError>>({

@@ -187,6 +187,8 @@ export class KnowledgeSpaceExecutionRepo {
       const claimed = await trx
         .updateTable('knowledgeSpaceCompileRunPages')
         .set({
+          status: 'running',
+          startedAt: new Date(),
           attemptCount: page.attemptCount + 1,
           ...(unbound ? { bindingStatus: 'binding' as const } : {}),
           updatedAt: new Date(),
@@ -248,6 +250,7 @@ export class KnowledgeSpaceExecutionRepo {
       const claimed = await trx
         .updateTable('knowledgeSpaceCompileRunPages')
         .set({
+          mergeStatus: 'running',
           mergeAttemptCount: page.mergeAttemptCount + 1,
           updatedAt: new Date(),
         })
@@ -397,13 +400,6 @@ export class KnowledgeSpaceExecutionRepo {
       .forUpdate()
       .executeTakeFirst();
     return Boolean(page);
-  }
-
-  async isLeaseActiveForSpacePublication(
-    lease: SpaceExecutionLease,
-    trx: KyselyTransaction,
-  ): Promise<boolean> {
-    return Boolean(await this.lockLeasedRun(trx, lease));
   }
 
   async isLeaseActiveForMergePublication(
