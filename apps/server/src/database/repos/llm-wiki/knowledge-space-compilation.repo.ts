@@ -917,20 +917,8 @@ export class KnowledgeSpaceCompilationRepo {
       .where('spaceId', '=', request.spaceId)
       .where('sourcePageId', 'in', removedSourcePageIds)
       .execute();
-    const overviews = await trx
-      .selectFrom('knowledgePages')
-      .select('id')
-      .where('workspaceId', '=', request.workspaceId)
-      .where('spaceId', '=', request.spaceId)
-      .where('compileScope', '=', 'space')
-      .where('pageType', '=', 'overview')
-      .where('staleAt', 'is', null)
-      .execute();
     const artifactIds = [
-      ...new Set([
-        ...affectedArtifacts.map((row) => row.artifactId),
-        ...overviews.map((row) => row.id),
-      ]),
+      ...new Set(affectedArtifacts.map((row) => row.artifactId)),
     ];
     if (artifactIds.length > 0) {
       await trx

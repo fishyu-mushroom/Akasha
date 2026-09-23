@@ -25,6 +25,7 @@ describe('KnowledgeImportService', () => {
       contentMarkdown: '# Too large',
       sourcePageIds: ['source-1'],
       artifactKind: 'source_summary' as const,
+      canonicalKey: 'source-1',
       compilerVersion: 'compiler@1',
       promptVersion: 'prompt@1',
       chunks: Array.from({ length: 201 }, (_, index) => ({
@@ -82,7 +83,10 @@ describe('KnowledgeImportService', () => {
       })),
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn().mockResolvedValue(undefined),
+      markSourceArtifactsStaleBySourcePageIds: jest
+        .fn()
+        .mockResolvedValue(undefined),
+      markArtifactsStaleByIds: jest.fn().mockResolvedValue(undefined),
       upsertCompiledArtifacts: jest.fn().mockResolvedValue(undefined),
     };
     const service = new KnowledgeImportService(
@@ -135,6 +139,7 @@ describe('KnowledgeImportService', () => {
       contentMarkdown: '# Table page',
       sourcePageIds: ['source-1'],
       artifactKind: 'source_summary' as const,
+      canonicalKey: 'source-1',
       compilerVersion: 'compiler@1',
       promptVersion: 'prompt@1',
       chunks: Array.from({ length: 1_000 }, (_, index) => ({
@@ -144,7 +149,10 @@ describe('KnowledgeImportService', () => {
       })),
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn().mockResolvedValue(undefined),
+      markSourceArtifactsStaleBySourcePageIds: jest
+        .fn()
+        .mockResolvedValue(undefined),
+      markArtifactsStaleByIds: jest.fn().mockResolvedValue(undefined),
       upsertCompiledArtifacts: jest.fn().mockResolvedValue(undefined),
     };
     const embeddingProvider = {
@@ -249,6 +257,7 @@ describe('KnowledgeImportService', () => {
       contentMarkdown: '# Compiled',
       sourcePageIds: ['source-1'],
       artifactKind: 'source_summary' as const,
+      canonicalKey: 'source-1',
       generationMode: 'semantic' as const,
       compilerVersion: 'compiler@1',
       promptVersion: 'prompt@1',
@@ -272,7 +281,10 @@ describe('KnowledgeImportService', () => {
       replaceSourceChunks: jest.fn().mockResolvedValue(undefined),
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn().mockResolvedValue(undefined),
+      markSourceArtifactsStaleBySourcePageIds: jest
+        .fn()
+        .mockResolvedValue(undefined),
+      markArtifactsStaleByIds: jest.fn().mockResolvedValue(undefined),
       upsertCompiledArtifacts: jest
         .fn()
         .mockResolvedValue({ id: 'artifact-1' }),
@@ -413,13 +425,15 @@ describe('KnowledgeImportService', () => {
       }),
     };
     const embeddingProvider = {
-      embedRequired: jest.fn().mockRejectedValueOnce(
-        new KnowledgeEmbeddingError(
-          'embedding_provider_error',
-          'Knowledge embedding provider request failed.',
-          true,
+      embedRequired: jest
+        .fn()
+        .mockRejectedValueOnce(
+          new KnowledgeEmbeddingError(
+            'embedding_provider_error',
+            'Knowledge embedding provider request failed.',
+            true,
+          ),
         ),
-      ),
       embedQuery: jest.fn(),
     };
     const capsuleRepo = {
@@ -464,6 +478,7 @@ describe('KnowledgeImportService', () => {
       contentMarkdown: '# Compiled',
       sourcePageIds: ['source-1'],
       artifactKind: 'source_summary' as const,
+      canonicalKey: 'source-1',
       generationMode: 'semantic' as const,
       compilerVersion: 'compiler@1',
       promptVersion: 'prompt@1',
@@ -479,7 +494,8 @@ describe('KnowledgeImportService', () => {
       chunks: [{ text: 'Enterprise retrieval' }],
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn(),
+      markSourceArtifactsStaleBySourcePageIds: jest.fn(),
+      markArtifactsStaleByIds: jest.fn(),
       upsertCompiledArtifacts: jest.fn(),
     };
     const vectorIndex = {
@@ -582,7 +598,10 @@ describe('KnowledgeImportService', () => {
       replaceSourceChunks: jest.fn().mockResolvedValue(undefined),
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn().mockResolvedValue(undefined),
+      markSourceArtifactsStaleBySourcePageIds: jest
+        .fn()
+        .mockResolvedValue(undefined),
+      markArtifactsStaleByIds: jest.fn().mockResolvedValue(undefined),
       upsertCompiledArtifacts: jest
         .fn()
         .mockResolvedValue({ id: 'artifact-1' }),
@@ -631,15 +650,19 @@ describe('KnowledgeImportService', () => {
       },
       expect.anything(),
     );
-    expect(capsuleRepo.markCompileScopeStale).toHaveBeenCalledWith(
+    expect(
+      capsuleRepo.markSourceArtifactsStaleBySourcePageIds,
+    ).toHaveBeenCalledWith(
       {
         workspaceId: 'workspace-1',
         spaceId: 'space-1',
+        sourcePageIds: ['source-1'],
       },
       expect.anything(),
     );
     expect(
-      capsuleRepo.markCompileScopeStale.mock.invocationCallOrder[0],
+      capsuleRepo.markSourceArtifactsStaleBySourcePageIds.mock
+        .invocationCallOrder[0],
     ).toBeLessThan(
       capsuleRepo.upsertCompiledArtifacts.mock.invocationCallOrder[0],
     );
@@ -795,6 +818,8 @@ describe('KnowledgeImportService', () => {
       title: 'Compiled',
       contentMarkdown: '# Compiled',
       sourcePageIds: ['source-1'],
+      artifactKind: 'source_summary' as const,
+      canonicalKey: 'source-1',
       compilerVersion: 'compiler@1',
       promptVersion: 'prompt@1',
       compilerRunId: 'run-1',
@@ -834,7 +859,10 @@ describe('KnowledgeImportService', () => {
       replaceSourceChunks: jest.fn().mockResolvedValue(undefined),
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn().mockResolvedValue(undefined),
+      markSourceArtifactsStaleBySourcePageIds: jest
+        .fn()
+        .mockResolvedValue(undefined),
+      markArtifactsStaleByIds: jest.fn().mockResolvedValue(undefined),
       upsertCompiledArtifacts: jest
         .fn()
         .mockResolvedValue({ id: 'artifact-1' }),
@@ -891,7 +919,7 @@ describe('KnowledgeImportService', () => {
       replaceSourceChunks: jest.fn().mockResolvedValue(undefined),
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn(),
+      markSourceArtifactsStaleBySourcePageIds: jest.fn(),
       upsertCompiledArtifacts: jest.fn(),
     };
     const validator = {
@@ -920,13 +948,12 @@ describe('KnowledgeImportService', () => {
 
     await expect(
       service.importCompileResult({ input: compileInput(), artifacts: [] }),
-    ).resolves.toEqual({
-      importedArtifactCount: 0,
-      quarantinedArtifactCount: 1,
-    });
+    ).rejects.toBeInstanceOf(KnowledgeCompilationValidationError);
 
     expect(capsuleRepo.upsertCompiledArtifacts).not.toHaveBeenCalled();
-    expect(capsuleRepo.markCompileScopeStale).not.toHaveBeenCalled();
+    expect(
+      capsuleRepo.markSourceArtifactsStaleBySourcePageIds,
+    ).not.toHaveBeenCalled();
   });
 
   it('replaces only affected source artifacts for page compilation', async () => {
@@ -957,7 +984,6 @@ describe('KnowledgeImportService', () => {
       replaceSourceChunks: jest.fn().mockResolvedValue(undefined),
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn(),
       markSourceArtifactsStaleBySourcePageIds: jest
         .fn()
         .mockResolvedValue(undefined),
@@ -987,7 +1013,6 @@ describe('KnowledgeImportService', () => {
       artifacts: [artifact],
     });
 
-    expect(capsuleRepo.markCompileScopeStale).not.toHaveBeenCalled();
     expect(
       capsuleRepo.markSourceArtifactsStaleBySourcePageIds,
     ).toHaveBeenCalledWith(
@@ -1047,7 +1072,6 @@ describe('KnowledgeImportService', () => {
       }),
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn(),
       markSourceArtifactsStaleBySourcePageIds: jest.fn(),
       markArtifactsStaleByIds: jest.fn().mockResolvedValue(undefined),
       upsertCompiledArtifacts: jest.fn().mockResolvedValue([]),
@@ -1303,49 +1327,6 @@ describe('KnowledgeImportService', () => {
     expect(sourceRepo.upsertPageSource).not.toHaveBeenCalled();
   });
 
-  it('fences empty Space retirement before marking aggregate artifacts stale', async () => {
-    const trx = { id: 'trx-retire-space' };
-    const capsuleRepo = {
-      markCompileScopeStale: jest.fn(),
-    };
-    const publicationGuard = jest.fn().mockResolvedValue(false);
-    const service = new KnowledgeImportService(
-      { markSourcesStale: jest.fn() } as never,
-      capsuleRepo as never,
-      {
-        validateCompileResult: jest.fn().mockReturnValue({
-          accepted: [],
-          quarantined: [],
-        }),
-      } as never,
-      { embedQuery: jest.fn() } as never,
-      { recordQuarantinedArtifacts: jest.fn() } as never,
-      createTransactionDb(trx) as never,
-      { ensureProfileIndex: jest.fn() } as never,
-      createContributionRepo() as never,
-      createMaterializer() as never,
-    );
-
-    await expect(
-      service.importCompileResult({
-        input: {
-          ...compileInput(),
-          compileMode: 'space',
-          sources: [],
-        },
-        artifacts: [],
-        upsertSources: false,
-        retireCompileScope: true,
-        publicationGuard,
-      }),
-    ).resolves.toEqual(
-      expect.objectContaining({ skippedReason: 'run_superseded' }),
-    );
-
-    expect(publicationGuard).toHaveBeenCalledWith(trx);
-    expect(capsuleRepo.markCompileScopeStale).not.toHaveBeenCalled();
-  });
-
   it('rejects a semantic page publication atomically when any artifact is quarantined', async () => {
     const artifact = {
       artifactId: 'artifact-invalid',
@@ -1438,7 +1419,7 @@ describe('KnowledgeImportService', () => {
       replaceSourceChunks: jest.fn().mockResolvedValue(undefined),
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn(),
+      markSourceArtifactsStaleBySourcePageIds: jest.fn(),
       upsertCompiledArtifacts: jest.fn(),
     };
     const quarantineRepo = {
@@ -1478,10 +1459,7 @@ describe('KnowledgeImportService', () => {
         input: compileInput(),
         artifacts: [quarantinedArtifact],
       }),
-    ).resolves.toEqual({
-      importedArtifactCount: 0,
-      quarantinedArtifactCount: 1,
-    });
+    ).rejects.toBeInstanceOf(KnowledgeCompilationValidationError);
 
     expect(quarantineRepo.recordQuarantinedArtifacts).toHaveBeenCalledWith(
       {
@@ -1511,114 +1489,6 @@ describe('KnowledgeImportService', () => {
     expect(capsuleRepo.upsertCompiledArtifacts).not.toHaveBeenCalled();
   });
 
-  it('writes stale markers, quarantine records, and compiled artifacts in one transaction', async () => {
-    const trx = { id: 'trx-1' };
-    const artifact = {
-      artifactId: 'artifact-1',
-      workspaceId: 'workspace-1',
-      spaceId: 'space-1',
-      title: 'Compiled',
-      contentMarkdown: '# Compiled',
-      sourcePageIds: ['source-1'],
-      artifactKind: 'source_summary' as const,
-      generationMode: 'semantic' as const,
-      compilerVersion: 'compiler@1',
-      promptVersion: 'prompt@1',
-      inputSourceRefs: [
-        {
-          workspaceId: 'workspace-1',
-          spaceId: 'space-1',
-          sourcePageId: 'source-1',
-          sourceVersion: 'v1',
-          contentHash: 'hash-1',
-        },
-      ],
-      chunks: [{ text: 'Kafka is used for events.' }],
-    };
-    const quarantinedArtifact = {
-      artifactId: 'artifact-quarantined-1',
-      workspaceId: 'workspace-1',
-      spaceId: 'space-1',
-      title: 'Quarantined',
-      contentMarkdown: '# Quarantined',
-      sourcePageIds: ['source-1'],
-      artifactKind: 'overview' as const,
-      compilerVersion: 'compiler@1',
-      promptVersion: 'prompt@1',
-      compilerRunId: 'run-1',
-      compileTaskId: 'task-1',
-    };
-    const sourceRepo = {
-      upsertPageSource: jest.fn().mockResolvedValue({ id: 'source-row-1' }),
-      replaceSourceChunks: jest.fn().mockResolvedValue(undefined),
-    };
-    const capsuleRepo = {
-      markCompileScopeStale: jest.fn().mockResolvedValue(undefined),
-      upsertCompiledArtifacts: jest
-        .fn()
-        .mockResolvedValue({ id: 'artifact-1' }),
-    };
-    const quarantineRepo = {
-      recordQuarantinedArtifacts: jest.fn().mockResolvedValue(undefined),
-    };
-    const validator = {
-      validateCompileResult: jest.fn().mockReturnValue({
-        accepted: [artifact],
-        quarantined: [
-          {
-            artifact: quarantinedArtifact,
-            reasons: ['artifact source range is invalid'],
-          },
-        ],
-      }),
-    };
-    const embeddingProvider = {
-      embedQuery: jest.fn().mockResolvedValue(testEmbedding()),
-    };
-    const service = new KnowledgeImportService(
-      sourceRepo as unknown as KnowledgeSourceRepo,
-      capsuleRepo as unknown as KnowledgeCapsuleRepo,
-      validator as unknown as KnowledgeArtifactValidatorService,
-      embeddingProvider as never,
-      quarantineRepo as never,
-      createTransactionDb(trx) as never,
-      { ensureProfileIndex: jest.fn() } as never,
-      createContributionRepo() as never,
-      createMaterializer() as never,
-    );
-
-    await service.importCompileResult({
-      input: compileInput(),
-      artifacts: [artifact, quarantinedArtifact],
-    });
-
-    expect(capsuleRepo.markCompileScopeStale).toHaveBeenCalledWith(
-      {
-        workspaceId: 'workspace-1',
-        spaceId: 'space-1',
-      },
-      trx,
-    );
-    expect(quarantineRepo.recordQuarantinedArtifacts).toHaveBeenCalledWith(
-      expect.objectContaining({
-        workspaceId: 'workspace-1',
-        spaceId: 'space-1',
-      }),
-      trx,
-    );
-    expect(capsuleRepo.upsertCompiledArtifacts).toHaveBeenCalledWith(
-      [
-        expect.objectContaining({
-          page: expect.objectContaining({
-            id: 'artifact-1',
-            generationMode: 'semantic',
-          }),
-        }),
-      ],
-      trx,
-    );
-  });
-
   it('rejects every durable publication write when the run fence is closed', async () => {
     const trx = { id: 'trx-fenced' };
     const artifact = {
@@ -1629,6 +1499,7 @@ describe('KnowledgeImportService', () => {
       contentMarkdown: '# Fenced artifact',
       sourcePageIds: ['source-1'],
       artifactKind: 'source_summary' as const,
+      canonicalKey: 'source-1',
       compilerVersion: 'compiler@1',
       promptVersion: 'prompt@1',
       inputSourceRefs: [
@@ -1647,7 +1518,10 @@ describe('KnowledgeImportService', () => {
       replaceSourceChunks: jest.fn().mockResolvedValue(undefined),
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn().mockResolvedValue(undefined),
+      markSourceArtifactsStaleBySourcePageIds: jest
+        .fn()
+        .mockResolvedValue(undefined),
+      markArtifactsStaleByIds: jest.fn().mockResolvedValue(undefined),
       upsertCompiledArtifacts: jest.fn().mockResolvedValue(undefined),
     };
     const validator = {
@@ -1684,7 +1558,9 @@ describe('KnowledgeImportService', () => {
     expect(publicationGuard).toHaveBeenCalledWith(trx);
     expect(sourceRepo.upsertPageSource).not.toHaveBeenCalled();
     expect(sourceRepo.replaceSourceChunks).not.toHaveBeenCalled();
-    expect(capsuleRepo.markCompileScopeStale).not.toHaveBeenCalled();
+    expect(
+      capsuleRepo.markSourceArtifactsStaleBySourcePageIds,
+    ).not.toHaveBeenCalled();
     expect(capsuleRepo.upsertCompiledArtifacts).not.toHaveBeenCalled();
   });
 
@@ -1768,6 +1644,7 @@ describe('KnowledgeImportService', () => {
       contentMarkdown: '# Compiled',
       sourcePageIds: ['source-1'],
       artifactKind: 'source_summary' as const,
+      canonicalKey: 'source-1',
       compilerVersion: 'compiler@1',
       promptVersion: 'prompt@1',
       compilerRunId: 'run-1',
@@ -1803,7 +1680,10 @@ describe('KnowledgeImportService', () => {
       ],
     };
     const capsuleRepo = {
-      markCompileScopeStale: jest.fn().mockResolvedValue(undefined),
+      markSourceArtifactsStaleBySourcePageIds: jest
+        .fn()
+        .mockResolvedValue(undefined),
+      markArtifactsStaleByIds: jest.fn().mockResolvedValue(undefined),
       upsertCompiledArtifacts: jest.fn().mockResolvedValue(undefined),
     };
     const service = new KnowledgeImportService(
@@ -1852,6 +1732,7 @@ function compileInput(): CompileSpaceInput {
     spaceId: 'space-1',
     compilerVersion: 'compiler@1',
     promptVersion: 'prompt@1',
+    compileMode: 'pages',
     sources: [
       {
         workspaceId: 'workspace-1',

@@ -207,7 +207,6 @@ describePostgres('KnowledgeSpaceCompilationRepo PostgreSQL round trip', () => {
     expect(evidence).toEqual({
       sourceStale: true,
       artifactStale: true,
-      overviewStale: true,
       childStaleCount: 5,
       contributionCount: 1,
       initializedAt: null,
@@ -954,8 +953,7 @@ async function seedInitializedRemovedSourcePlan(
     insert into knowledge_pages (
       id, workspace_id, space_id, page_type, compile_scope
     ) values
-      ('artifact-removed', 'workspace-1', 'space-removed', 'concept', 'page'),
-      ('overview-removed', 'workspace-1', 'space-removed', 'overview', 'space');
+      ('artifact-removed', 'workspace-1', 'space-removed', 'concept', 'page');
     insert into knowledge_artifact_contributions (
       id, workspace_id, space_id, source_page_id, artifact_id
     ) values (
@@ -975,7 +973,7 @@ async function seedInitializedRemovedSourcePlan(
       'link-removed', 'workspace-1', 'artifact-removed', null
     );
     insert into knowledge_graph_edges values (
-      'edge-removed', 'workspace-1', 'overview-removed', null
+      'edge-removed', 'workspace-1', 'artifact-removed', null
     )
   `.execute(db);
 }
@@ -987,7 +985,6 @@ async function readRemovedSourceReplanEvidence(
   const result = await sql<{
     sourceStale: boolean;
     artifactStale: boolean;
-    overviewStale: boolean;
     childStaleCount: number;
     contributionCount: number;
     initializedAt: Date | null;
@@ -1002,8 +999,6 @@ async function readRemovedSourceReplanEvidence(
        where id = 'source-removed') as "sourceStale",
       (select stale_at is not null from knowledge_pages
        where id = 'artifact-removed') as "artifactStale",
-      (select stale_at is not null from knowledge_pages
-       where id = 'overview-removed') as "overviewStale",
       ((select count(*) from knowledge_parent_sections where stale_at is not null)
        + (select count(*) from knowledge_claims where stale_at is not null)
        + (select count(*) from knowledge_chunks where stale_at is not null)

@@ -174,7 +174,7 @@ export class SemanticKnowledgeCompilerRunner implements LlmWikiCompilerRunner {
     for (const entry of generationCatalog.entries) {
       if (!entry.artifactId) continue;
       const normalizedKey = normalizeCanonicalKey(entry.canonicalKey);
-      // Artifacts without a canonical key (e.g. source_summary/overview) cannot
+      // Artifacts without a canonical key (for example source_summary) cannot
       // be resolved as link targets, and would otherwise collide on "kind:".
       if (!normalizedKey) continue;
       idByKey.set(
@@ -863,7 +863,7 @@ function toSourceRef(source: KnowledgeSourceSnapshot): KnowledgeSourceRef {
 }
 
 function normalizeCanonicalKey(value: string | null | undefined): string {
-  // Stored source_summary/overview artifacts legitimately have a null
+  // Stored source_summary artifacts legitimately have a null
   // canonicalKey, so guard against it rather than assuming a string.
   return (value ?? '').trim().toLocaleLowerCase('en-US');
 }

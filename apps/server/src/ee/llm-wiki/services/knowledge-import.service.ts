@@ -87,7 +87,6 @@ export class KnowledgeImportService {
     onStage?: (stage: KnowledgeImportStage) => void | Promise<void>;
     upsertSources?: boolean;
     retireSources?: boolean;
-    retireCompileScope?: boolean;
     publicationGuard?: (trx: KyselyTransaction) => Promise<boolean>;
     publicationComplete?: (trx: KyselyTransaction) => Promise<void>;
   }): Promise<KnowledgeImportResult> {
@@ -107,8 +106,7 @@ export class KnowledgeImportService {
       compileTaskId: quarantined.artifact.compileTaskId ?? null,
       reasonCodes: toQuarantineReasonCodes(quarantined.reasons),
     }));
-    const isSemanticPagePublication =
-      input.input.compileMode === 'pages' && input.input.sources.length === 1;
+    const isSemanticPagePublication = input.input.sources.length === 1;
     if (isSemanticPagePublication && quarantineInputs.length > 0) {
       let quarantinePublicationRejected = false;
       await executeTx(this.db, async (trx) => {
@@ -419,7 +417,7 @@ export class KnowledgeImportService {
           id: artifact.artifactId,
           workspaceId: artifact.workspaceId,
           spaceId: artifact.spaceId,
-          compileScope: input.input.compileMode === 'pages' ? 'page' : 'space',
+          compileScope: 'page',
           title: artifact.title,
           slug: artifact.artifactId,
           body: artifact.contentMarkdown,
@@ -499,8 +497,7 @@ export class KnowledgeImportService {
       artifactInputs.length > 0 ||
       quarantineInputs.length > 0 ||
       Boolean(contributionPublication) ||
-      input.retireSources === true ||
-      input.retireCompileScope === true
+      input.retireSources === true
     ) {
       operationBudget.throwIfAborted();
       await executeTx(this.db, async (trx) => {
@@ -515,16 +512,6 @@ export class KnowledgeImportService {
               workspaceId: input.input.workspaceId,
               spaceId: input.input.spaceId,
               sourcePageIds: uniqueSourcePageIds(input.input),
-            },
-            trx,
-          );
-        }
-
-        if (input.retireCompileScope) {
-          await this.capsuleRepo.markCompileScopeStale(
-            {
-              workspaceId: input.input.workspaceId,
-              spaceId: input.input.spaceId,
             },
             trx,
           );
@@ -612,28 +599,15 @@ export class KnowledgeImportService {
             },
             trx,
           );
-        } else if (
-          artifactInputs.length > 0 &&
-          input.retireCompileScope !== true
-        ) {
-          if (input.input.compileMode === 'pages') {
-            await this.capsuleRepo.markSourceArtifactsStaleBySourcePageIds(
-              {
-                workspaceId: input.input.workspaceId,
-                spaceId: input.input.spaceId,
-                sourcePageIds: uniqueSourcePageIds(input.input),
-              },
-              trx,
-            );
-          } else {
-            await this.capsuleRepo.markCompileScopeStale(
-              {
-                workspaceId: input.input.workspaceId,
-                spaceId: input.input.spaceId,
-              },
-              trx,
-            );
-          }
+        } else if (artifactInputs.length > 0) {
+          await this.capsuleRepo.markSourceArtifactsStaleBySourcePageIds(
+            {
+              workspaceId: input.input.workspaceId,
+              spaceId: input.input.spaceId,
+              sourcePageIds: uniqueSourcePageIds(input.input),
+            },
+            trx,
+          );
         }
 
         if (quarantineInputs.length > 0) {
