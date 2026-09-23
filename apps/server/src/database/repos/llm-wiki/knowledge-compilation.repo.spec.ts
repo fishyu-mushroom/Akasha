@@ -472,27 +472,6 @@ describe('KnowledgeCompilationRepo', () => {
     );
   });
 
-  it('returns page diagnostics for the requested workspace pages', async () => {
-    const row = { sourcePageId: 'page-1', status: 'failed' };
-    const query = new FakeKyselyQuery([row]);
-    const repo = new KnowledgeCompilationRepo(query as never);
-
-    await expect(
-      repo.findDiagnosticsByPageIds({
-        workspaceId: 'workspace-1',
-        sourcePageIds: ['page-1'],
-      }),
-    ).resolves.toEqual([row]);
-
-    expect(query.calls).toEqual([
-      { method: 'selectFrom', args: ['knowledgeCompilationAttempts'] },
-      { method: 'selectAll', args: [] },
-      { method: 'where', args: ['workspaceId', '=', 'workspace-1'] },
-      { method: 'where', args: ['sourcePageId', 'in', ['page-1']] },
-      { method: 'orderBy', args: ['updatedAt', 'desc'] },
-      { method: 'execute', args: [] },
-    ]);
-  });
 });
 
 const integrationDatabaseUrl =

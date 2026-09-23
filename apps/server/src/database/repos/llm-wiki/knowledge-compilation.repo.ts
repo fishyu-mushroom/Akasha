@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { sql } from 'kysely';
 import { JsonValue } from '@akasha/db/types/db';
-import {
-  KnowledgeCompilationAttempt,
-  KnowledgeSourceAnalysis,
-} from '@akasha/db/types/entity.types';
+import { KnowledgeSourceAnalysis } from '@akasha/db/types/entity.types';
 import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
 import { dbOrTx, executeTx } from '@akasha/db/utils';
 
@@ -480,21 +477,6 @@ export class KnowledgeCompilationRepo {
       },
       trx,
     );
-  }
-
-  async findDiagnosticsByPageIds(input: {
-    workspaceId: string;
-    sourcePageIds: string[];
-  }): Promise<KnowledgeCompilationAttempt[]> {
-    if (input.sourcePageIds.length === 0) return [];
-
-    return this.db
-      .selectFrom('knowledgeCompilationAttempts')
-      .selectAll()
-      .where('workspaceId', '=', input.workspaceId)
-      .where('sourcePageId', 'in', input.sourcePageIds)
-      .orderBy('updatedAt', 'desc')
-      .execute();
   }
 
   /**
