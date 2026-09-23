@@ -161,7 +161,7 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
     await sql`
       update knowledge_space_compile_runs
       set rerun_requested = true,
-          target_source_page_ids = '["page-1", "page-2"]'::jsonb
+          follow_up_target_source_page_ids = '["page-1", "page-2"]'::jsonb
       where id = 'run-finish'
     `.execute(db);
 
@@ -363,11 +363,205 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       errorCode: 'source_changed',
     });
 
-    const state = await sql<{ rerunRequested: boolean }>`
-      select rerun_requested as "rerunRequested"
+    // A full-Space Run that finds one page changed mid-run must narrow its
+    // follow-up scope to that page, not re-discover the whole Space.
+    const state = await sql<{
+      rerunRequested: boolean;
+      targetSourcePageIds: string[] | null;
+      followUpTargetSourcePageIds: string[] | null;
+    }>`
+      select rerun_requested as "rerunRequested",
+             target_source_page_ids as "targetSourcePageIds",
+             follow_up_target_source_page_ids as "followUpTargetSourcePageIds"
       from knowledge_space_compile_runs where id = 'run-text-changed'
     `.execute(db);
-    expect(state.rows).toEqual([{ rerunRequested: true }]);
+    expect(state.rows).toEqual([
+      {
+        rerunRequested: true,
+        targetSourcePageIds: null,
+        followUpTargetSourcePageIds: ['changed-page'],
+      },
+    ]);
+
+    const finished = await executionRepo.finishRun(lease, 'succeeded');
+    expect(finished?.followUp).toMatchObject({
+      trigger: 'follow_up',
+      targetSourcePageIds: ['changed-page'],
+    });
+  });
+
+  it('unions every page changed mid-run into the follow-up scope', async () => {
+    await sql`
+      insert into spaces (id, workspace_id, name)
+      values ('space-multi-changed', 'workspace-1', 'Multi changed');
+      insert into knowledge_space_compile_runs (
+        id, workspace_id, space_id, trigger, compiler_version, prompt_version,
+        catalog_hash, space_job_queued_at
+      ) values (
+        'run-multi-changed', 'workspace-1', 'space-multi-changed', 'manual',
+        'compiler-v1', 'prompt-v1', 'pending-initialization', now()
+      );
+      insert into pages (id, workspace_id, space_id, updated_at)
+      values
+        ('multi-page-a', 'workspace-1', 'space-multi-changed', now()),
+        ('multi-page-b', 'workspace-1', 'space-multi-changed', now())
+    `.execute(db);
+    const lease = await claimedLease(
+      compilationRepo,
+      executionRepo,
+      'run-multi-changed',
+      'multi-changed-token',
+    );
+    await executionRepo.initializeRun(lease, {
+      aggregateRequired: true,
+      targetSourcePageIds: null,
+    });
+
+    for (const sourcePageId of ['multi-page-a', 'multi-page-b']) {
+      await executionRepo.claimNextTextPage(lease);
+      await executionRepo.bindTextPage(lease, {
+        ...pagePlan(sourcePageId),
+        images: [],
+      });
+      await executionRepo.completeTextPage(lease, {
+        sourcePageId,
+        sourceVersion: 'v1',
+        sourceContentHash: `sha256:${sourcePageId}`,
+        status: 'skipped',
+        errorCode: 'source_changed',
+      });
+    }
+
+    // The second changed page must union with the first, not overwrite it.
+    const state = await sql<{
+      targetSourcePageIds: string[] | null;
+      followUpTargetSourcePageIds: string[] | null;
+    }>`
+      select target_source_page_ids as "targetSourcePageIds",
+             follow_up_target_source_page_ids as "followUpTargetSourcePageIds"
+      from knowledge_space_compile_runs where id = 'run-multi-changed'
+    `.execute(db);
+    expect(state.rows[0]?.targetSourcePageIds).toBeNull();
+    expect(state.rows[0]?.followUpTargetSourcePageIds?.slice().sort()).toEqual([
+      'multi-page-a',
+      'multi-page-b',
+    ]);
+  });
+
+  it('keeps a multi-page current scope immutable when one page changes', async () => {
+    await sql`
+      insert into spaces (id, workspace_id, name)
+      values ('space-scoped-changed', 'workspace-1', 'Scoped changed');
+      insert into knowledge_space_compile_runs (
+        id, workspace_id, space_id, trigger, compiler_version, prompt_version,
+        catalog_hash, target_source_page_ids, space_job_queued_at
+      ) values (
+        'run-scoped-changed', 'workspace-1', 'space-scoped-changed', 'page_retry',
+        'compiler-v1', 'prompt-v1', 'pending-initialization',
+        '["scoped-page-a", "scoped-page-b"]'::jsonb, now()
+      );
+      insert into pages (id, workspace_id, space_id, updated_at)
+      values
+        ('scoped-page-a', 'workspace-1', 'space-scoped-changed', now()),
+        ('scoped-page-b', 'workspace-1', 'space-scoped-changed', now())
+    `.execute(db);
+    const lease = await claimedLease(
+      compilationRepo,
+      executionRepo,
+      'run-scoped-changed',
+      'scoped-changed-token',
+    );
+    await executionRepo.initializeRun(lease, {
+      aggregateRequired: true,
+      targetSourcePageIds: ['scoped-page-a', 'scoped-page-b'],
+    });
+    await executionRepo.claimNextTextPage(lease);
+    await executionRepo.bindTextPage(lease, {
+      ...pagePlan('scoped-page-a'),
+      images: [],
+    });
+    await executionRepo.completeTextPage(lease, {
+      sourcePageId: 'scoped-page-a',
+      sourceVersion: 'v1',
+      sourceContentHash: 'sha256:scoped-page-a',
+      status: 'skipped',
+      errorCode: 'source_changed',
+    });
+
+    const state = await sql<{
+      targetSourcePageIds: string[];
+      followUpTargetSourcePageIds: string[];
+    }>`
+      select target_source_page_ids as "targetSourcePageIds",
+             follow_up_target_source_page_ids as "followUpTargetSourcePageIds"
+      from knowledge_space_compile_runs where id = 'run-scoped-changed'
+    `.execute(db);
+    expect(state.rows).toEqual([
+      {
+        targetSourcePageIds: ['scoped-page-a', 'scoped-page-b'],
+        followUpTargetSourcePageIds: ['scoped-page-a'],
+      },
+    ]);
+  });
+
+  it('bounds image snapshot follow-up without changing the current scope', async () => {
+    await sql`
+      insert into spaces (id, workspace_id, name)
+      values ('space-image-changed', 'workspace-1', 'Image changed');
+      insert into knowledge_space_compile_runs (
+        id, workspace_id, space_id, trigger, compiler_version, prompt_version,
+        catalog_hash, target_source_page_ids, phase, initialized_at,
+        expected_page_count, succeeded_page_count, space_job_queued_at
+      ) values (
+        'run-image-changed', 'workspace-1', 'space-image-changed', 'page_retry',
+        'compiler-v1', 'prompt-v1', 'pending-initialization',
+        '["image-page-a", "image-page-b"]'::jsonb, 'image_merge', now(),
+        1, 1, now()
+      );
+      insert into knowledge_space_compile_run_pages (
+        id, run_id, workspace_id, space_id, source_page_id, binding_status,
+        expected_source_version, expected_source_content_hash, status,
+        image_status, merge_status, merge_attempt_count
+      ) values (
+        'run-page-image-changed', 'run-image-changed', 'workspace-1',
+        'space-image-changed', 'image-page-a', 'bound', 'v1',
+        'sha256:image-page-a', 'succeeded', 'succeeded', 'pending', 0
+      )
+    `.execute(db);
+    const lease = await claimedLease(
+      compilationRepo,
+      executionRepo,
+      'run-image-changed',
+      'image-changed-token',
+    );
+    await executionRepo.claimNextMergePage(lease);
+    await executionRepo.failMergePage(lease, {
+      sourcePageId: 'image-page-a',
+      sourceVersion: 'v1',
+      sourceContentHash: 'sha256:image-page-a',
+      retryable: false,
+      errorCode: 'image_snapshot_changed',
+    });
+
+    const state = await sql<{
+      targetSourcePageIds: string[];
+      followUpTargetSourcePageIds: string[];
+    }>`
+      select target_source_page_ids as "targetSourcePageIds",
+             follow_up_target_source_page_ids as "followUpTargetSourcePageIds"
+      from knowledge_space_compile_runs where id = 'run-image-changed'
+    `.execute(db);
+    expect(state.rows).toEqual([
+      {
+        targetSourcePageIds: ['image-page-a', 'image-page-b'],
+        followUpTargetSourcePageIds: ['image-page-a'],
+      },
+    ]);
+    const finished = await executionRepo.finishRun(lease, 'partial');
+    expect(finished?.followUp).toMatchObject({
+      trigger: 'follow_up',
+      targetSourcePageIds: ['image-page-a'],
+    });
   });
 
   it('turns a force-run content update into one same-generation incremental follow-up', async () => {
@@ -464,9 +658,9 @@ describePostgres('KnowledgeSpaceExecutionRepo PostgreSQL fencing', () => {
       recoveryKind: 'expired',
     });
     expect(recovery?.executionToken).toBe('recovery-token');
-    await expect(
-      executionRepo.requeueMissingSpaceJob(recovery!),
-    ).resolves.toBe(true);
+    await expect(executionRepo.requeueMissingSpaceJob(recovery!)).resolves.toBe(
+      true,
+    );
     const next = await compilationRepo.reserveNextSpaceJob({
       runId: 'run-recovery',
     });
@@ -1060,6 +1254,7 @@ async function createFixture(db: Kysely<unknown>): Promise<void> {
       catalog_snapshot jsonb not null default '[]',
       catalog_hash varchar not null,
       target_source_page_ids jsonb,
+      follow_up_target_source_page_ids jsonb,
       aggregate_required boolean not null default true,
       aggregate_job_id varchar,
       aggregate_started_at timestamptz,

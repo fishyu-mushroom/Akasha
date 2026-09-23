@@ -740,6 +740,7 @@ export interface KnowledgeSpaceCompileRuns {
   expectedPageCount: Generated<number>;
   failedPageCount: Generated<number>;
   finishedAt: Timestamp | null;
+  followUpTargetSourcePageIds: Json | null;
   heartbeatAt: Timestamp | null;
   id: Generated<string>;
   importedArtifactCount: Generated<number>;

@@ -12,6 +12,10 @@ import type {
   KnowledgeSpaceCompileRunPhase,
   KnowledgeSpaceCompileRunStatus,
 } from './knowledge-space-compilation.repo';
+import {
+  parseTargetSourcePageIds,
+  reconcileFollowUpTargetScope,
+} from './knowledge-run-scope';
 
 export type SpaceJobPhase = 'text' | 'image_merge';
 
@@ -999,7 +1003,10 @@ export class KnowledgeSpaceExecutionRepo {
           failedPageCount: counts.failed,
           skippedPageCount: counts.skipped,
           ...(input.errorCode === 'source_changed'
-            ? { rerunRequested: true }
+            ? {
+                rerunRequested: true,
+                ...this.followUpScopeUpdate(run, input.sourcePageId),
+              }
             : {}),
           updatedAt: new Date(),
         })
@@ -1384,10 +1391,9 @@ export class KnowledgeSpaceExecutionRepo {
             catalogSnapshot: [] as JsonValue,
             catalogHash: 'pending-initialization',
             aggregateRequired: false,
-            // Page updates that arrive after initialization are coalesced into
-            // the active Run's requested scope. Carry that bounded scope to
-            // the follow-up instead of silently widening it to the whole Space.
-            targetSourcePageIds: run.targetSourcePageIds,
+            // Page updates and snapshot changes that arrive after initialization
+            // accumulate in a scope separate from the current Run's frozen plan.
+            targetSourcePageIds: run.followUpTargetSourcePageIds,
             queuedAt: now,
             spaceJobQueuedAt: now,
             updatedAt: now,
@@ -1397,6 +1403,29 @@ export class KnowledgeSpaceExecutionRepo {
       }
       return { run: finished, followUp };
     });
+  }
+
+  // When a page changes mid-run, accumulate it in the follow-up scope without
+  // mutating the current Run's frozen discovery scope. An explicitly requested
+  // full-Space follow-up stays full; otherwise only pages that changed after
+  // initialization are unioned into the bounded follow-up.
+  private followUpScopeUpdate(
+    run: { followUpTargetSourcePageIds: unknown; rerunRequested: boolean },
+    changedSourcePageId: string,
+  ): { followUpTargetSourcePageIds?: JsonValue | null } {
+    const scope = reconcileFollowUpTargetScope({
+      followUpTargetSourcePageIds: parseTargetSourcePageIds(
+        run.followUpTargetSourcePageIds,
+      ),
+      requestTargetSourcePageIds: [changedSourcePageId],
+      rerunAlreadyRequested: run.rerunRequested,
+    });
+    return scope.changed
+      ? {
+          followUpTargetSourcePageIds:
+            scope.targetSourcePageIds as JsonValue | null,
+        }
+      : {};
   }
 
   // Merge work that still blocks the barrier: pages actively being merged, plus
@@ -1500,7 +1529,10 @@ export class KnowledgeSpaceExecutionRepo {
           ...(['source_changed', 'image_snapshot_changed'].includes(
             input.errorCode ?? '',
           )
-            ? { rerunRequested: true }
+            ? {
+                rerunRequested: true,
+                ...this.followUpScopeUpdate(run, input.sourcePageId),
+              }
             : {}),
           updatedAt: new Date(),
         })

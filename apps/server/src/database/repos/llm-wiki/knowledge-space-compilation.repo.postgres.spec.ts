@@ -323,9 +323,8 @@ describePostgres('KnowledgeSpaceCompilationRepo PostgreSQL round trip', () => {
 
     expect(second.disposition).toBe('rerun_requested');
     expect(second.run?.rerunRequested).toBe(true);
-    expect(
-      [...((second.run?.targetSourcePageIds as string[] | null) ?? [])].sort(),
-    ).toEqual(['page-update-a', 'page-update-b']);
+    expect(second.run?.targetSourcePageIds).toEqual(['page-update-a']);
+    expect(second.run?.followUpTargetSourcePageIds).toEqual(['page-update-b']);
   });
 
   it('narrows the follow-up of an initialized full-Space Run to the changed page', async () => {
@@ -362,7 +361,10 @@ describePostgres('KnowledgeSpaceCompilationRepo PostgreSQL round trip', () => {
     });
 
     expect(updated.disposition).toBe('rerun_requested');
-    expect(updated.run?.targetSourcePageIds).toEqual(['page-full-active']);
+    expect(updated.run?.targetSourcePageIds).toBeNull();
+    expect(updated.run?.followUpTargetSourcePageIds).toEqual([
+      'page-full-active',
+    ]);
   });
 
   it('unions target pages when coalescing two page-scoped requests', async () => {
@@ -769,6 +771,7 @@ async function createFixture(db: Kysely<unknown>): Promise<void> {
       catalog_snapshot jsonb not null,
       catalog_hash varchar not null,
       target_source_page_ids jsonb,
+      follow_up_target_source_page_ids jsonb,
       aggregate_required boolean not null default true,
       aggregate_job_id varchar,
       aggregate_started_at timestamptz,
