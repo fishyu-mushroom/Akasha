@@ -73,8 +73,12 @@ import { KnowledgeSourceExporterService } from './services/knowledge-source-expo
 import { KnowledgeSpaceCompilationService } from './services/knowledge-space-compilation.service';
 import { KnowledgeSpaceResetService } from './services/knowledge-space-reset.service';
 import { AiModelConfigService } from './services/ai-model-config.service';
+import { AiModelConfigTestService } from './services/ai-model-config-test.service';
 import { AiModelConfigFeature } from '../../database/repos/llm-wiki/ai-model-config.repo';
-import { UpdateAiModelConfigDto } from './dto/ai-model-config.dto';
+import {
+  TestAiModelConfigDto,
+  UpdateAiModelConfigDto,
+} from './dto/ai-model-config.dto';
 import {
   buildKnowledgeAdminActionJobId,
   uniqueValues,
@@ -118,6 +122,7 @@ export class LlmWikiController {
     private readonly spaceAuthorization: SpaceAuthorizationService,
     private readonly pageAccessService: PageAccessService,
     private readonly aiModelConfigService: AiModelConfigService,
+    private readonly aiModelConfigTestService: AiModelConfigTestService,
     private readonly apiKeyService: ApiKeyService,
     @Optional() private readonly environmentService?: EnvironmentService,
     @Optional() private readonly agentAccessService?: AgentAccessService,
@@ -1094,6 +1099,28 @@ export class LlmWikiController {
       throw new BadRequestException('Unknown AI model configuration feature.');
     }
     return this.aiModelConfigService.updateConfig(feature, {
+      provider: dto.provider,
+      model: dto.model,
+      baseUrl: dto.baseUrl ?? null,
+      apiKey: dto.apiKey,
+      parameters: dto.parameters
+        ? (dto.parameters as unknown as Record<string, unknown>)
+        : null,
+    });
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('admin/model-configs/:feature/test')
+  async testModelConfig(
+    @Param('feature') feature: string,
+    @Body() dto: TestAiModelConfigDto,
+    @AuthUser() user: User,
+  ) {
+    this.assertAdmin(user, 'AI model configuration is restricted to admins');
+    if (!isModelConfigFeature(feature)) {
+      throw new BadRequestException('Unknown AI model configuration feature.');
+    }
+    return this.aiModelConfigTestService.testConfig(feature, {
       provider: dto.provider,
       model: dto.model,
       baseUrl: dto.baseUrl ?? null,

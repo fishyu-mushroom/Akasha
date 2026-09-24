@@ -22,6 +22,7 @@ import { KnowledgeSourceExporterService } from './services/knowledge-source-expo
 import { KnowledgeSpaceCompilationService } from './services/knowledge-space-compilation.service';
 import { KnowledgeSpaceResetService } from './services/knowledge-space-reset.service';
 import { AiModelConfigService } from './services/ai-model-config.service';
+import { AiModelConfigTestService } from './services/ai-model-config-test.service';
 import { SpaceAuthorizationService } from '../../core/space/services/space-authorization.service';
 import { PageAccessService } from '../../core/page/page-access/page-access.service';
 import { ApiKeyService } from '../api-key/api-key.service';
@@ -1399,6 +1400,56 @@ describe('LlmWikiController', () => {
     expect(spaceCompilation.requestRuns).not.toHaveBeenCalled();
   });
 
+  it('delegates a model config test to the test service for admins', async () => {
+    const aiModelConfigTestService = {
+      testConfig: jest.fn().mockResolvedValue({ ok: true, latencyMs: 42 }),
+    };
+    const controller = createController({ aiModelConfigTestService });
+
+    await expect(
+      controller.testModelConfig(
+        'answer',
+        { provider: 'openai-compatible', model: 'qwen-max' } as never,
+        adminUser(),
+      ),
+    ).resolves.toEqual({ ok: true, latencyMs: 42 });
+
+    expect(aiModelConfigTestService.testConfig).toHaveBeenCalledWith(
+      'answer',
+      expect.objectContaining({ provider: 'openai-compatible', model: 'qwen-max' }),
+    );
+  });
+
+  it('rejects a model config test from workspace members before testing', async () => {
+    const aiModelConfigTestService = { testConfig: jest.fn() };
+    const controller = createController({ aiModelConfigTestService });
+
+    await expect(
+      controller.testModelConfig(
+        'answer',
+        { provider: 'openai-compatible', model: 'qwen-max' } as never,
+        user(),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(aiModelConfigTestService.testConfig).not.toHaveBeenCalled();
+  });
+
+  it('rejects a model config test for an unknown feature', async () => {
+    const aiModelConfigTestService = { testConfig: jest.fn() };
+    const controller = createController({ aiModelConfigTestService });
+
+    await expect(
+      controller.testModelConfig(
+        'bogus',
+        { provider: 'openai-compatible', model: 'qwen-max' } as never,
+        adminUser(),
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(aiModelConfigTestService.testConfig).not.toHaveBeenCalled();
+  });
+
   describe('single-Space knowledge operations', () => {
     it('updates exactly one Space only after exact-name confirmation', async () => {
       const spaceCompilation = {
@@ -1567,6 +1618,7 @@ function createController(
     spaceAuthorization?: Partial<SpaceAuthorizationService>;
     pageAccessService?: Partial<PageAccessService>;
     aiModelConfigService?: Partial<AiModelConfigService>;
+    aiModelConfigTestService?: Partial<AiModelConfigTestService>;
     apiKeyService?: Partial<ApiKeyService>;
     environmentService?: Partial<EnvironmentService>;
     cacheManager?: { get: jest.Mock; set?: jest.Mock; del?: jest.Mock };
@@ -1652,6 +1704,10 @@ function createController(
       updateConfig: jest.fn(),
       ...overrides.aiModelConfigService,
     } as unknown as AiModelConfigService,
+    {
+      testConfig: jest.fn().mockResolvedValue({ ok: true, latencyMs: 1 }),
+      ...overrides.aiModelConfigTestService,
+    } as unknown as AiModelConfigTestService,
     {
       validatePublicApiKey: jest.fn(),
       ...overrides.apiKeyService,
