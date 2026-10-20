@@ -7,11 +7,10 @@ export async function up(db: Kysely<any>): Promise<void> {
     .ifExists()
     .execute();
 
-  await db.schema
-    .alterTable('knowledge_chunks')
-    .dropColumn('claim_id')
-    .ifExists()
-    .execute();
+  // Kysely's dropColumn has no ifExists(); use raw SQL so reruns stay safe.
+  await sql`ALTER TABLE knowledge_chunks DROP COLUMN IF EXISTS claim_id`.execute(
+    db,
+  );
 
   await db.schema
     .dropTable('knowledge_claims')
@@ -19,18 +18,15 @@ export async function up(db: Kysely<any>): Promise<void> {
     .execute();
 
   // Drop write-only columns from run pages
-  await db.schema
-    .alterTable('knowledge_space_compile_run_pages')
-    .dropColumn('image_job_id')
-    .ifExists()
-    .execute();
+  await sql`
+    ALTER TABLE knowledge_space_compile_run_pages
+      DROP COLUMN IF EXISTS image_job_id
+  `.execute(db);
 
   // Drop summary from pages (always null)
-  await db.schema
-    .alterTable('knowledge_pages')
-    .dropColumn('summary')
-    .ifExists()
-    .execute();
+  await sql`ALTER TABLE knowledge_pages DROP COLUMN IF EXISTS summary`.execute(
+    db,
+  );
 
   // Drop attachment_id from all sources tables (always null)
   for (const tableName of [
@@ -40,19 +36,16 @@ export async function up(db: Kysely<any>): Promise<void> {
     'knowledge_link_sources',
     'knowledge_graph_edge_sources',
   ]) {
-    await db.schema
-      .alterTable(tableName)
-      .dropColumn('attachment_id')
-      .ifExists()
-      .execute();
+    await sql`
+      ALTER TABLE ${sql.table(tableName)} DROP COLUMN IF EXISTS attachment_id
+    `.execute(db);
   }
 
   // Drop result_quality from attempts (always 'normal')
-  await db.schema
-    .alterTable('knowledge_compilation_attempts')
-    .dropColumn('result_quality')
-    .ifExists()
-    .execute();
+  await sql`
+    ALTER TABLE knowledge_compilation_attempts
+      DROP COLUMN IF EXISTS result_quality
+  `.execute(db);
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
