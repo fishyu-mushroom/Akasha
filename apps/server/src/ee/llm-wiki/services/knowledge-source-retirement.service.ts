@@ -9,6 +9,7 @@ import { KnowledgeSourceRepo } from '@akasha/db/repos/llm-wiki/knowledge-source.
 import { executeTx } from '@akasha/db/utils';
 import { KnowledgeImportService } from './knowledge-import.service';
 import { KnowledgeLinkResolverService } from './knowledge-link-resolver.service';
+import { isKnowledgeEligiblePage } from '@akasha/db/repos/llm-wiki/knowledge-page-eligibility';
 
 const MAX_RETIREMENT_CAS_ATTEMPTS = 3;
 
@@ -59,7 +60,7 @@ export class KnowledgeSourceRetirementService {
       }),
       this.db
         .selectFrom('pages')
-        .select(['id', 'spaceId', 'deletedAt'])
+        .select(['id', 'spaceId', 'deletedAt', 'type', 'databaseId'])
         .where('workspaceId', '=', input.workspaceId)
         .where('id', 'in', sourcePageIds)
         .execute(),
@@ -74,7 +75,9 @@ export class KnowledgeSourceRetirementService {
     );
     const liveSpaceByPageId = new Map(
       livePages
-        .filter((page) => page.deletedAt === null)
+        .filter(
+          (page) => page.deletedAt === null && isKnowledgeEligiblePage(page),
+        )
         .map((page) => [page.id, page.spaceId]),
     );
     let retiredSourceCount = 0;
@@ -213,12 +216,16 @@ export class KnowledgeSourceRetirementService {
     const db = trx ?? this.db;
     const page = await db
       .selectFrom('pages')
-      .select(['spaceId', 'deletedAt'])
+      .select(['spaceId', 'deletedAt', 'type', 'databaseId'])
       .where('workspaceId', '=', input.workspaceId)
       .where('id', '=', input.sourcePageId)
       .$if(Boolean(trx), (query) => query.forUpdate())
       .executeTakeFirst();
-    return page?.spaceId === input.spaceId && page.deletedAt === null;
+    return (
+      page?.spaceId === input.spaceId &&
+      page.deletedAt === null &&
+      isKnowledgeEligiblePage(page)
+    );
   }
 }
 

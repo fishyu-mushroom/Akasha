@@ -235,6 +235,8 @@ describe('PageRepo', () => {
         { method: 'where', args: ['workspaceId', '=', 'workspace-1'] },
         { method: 'where', args: ['spaceId', '=', 'space-1'] },
         { method: 'where', args: ['deletedAt', 'is', null] },
+        // Knowledge eligibility predicate (excludes databases and rows).
+        { method: 'where', args: [expect.anything()] },
         { method: 'orderBy', args: ['id', 'asc'] },
         { method: 'limit', args: [200] },
         { method: 'execute', args: [] },

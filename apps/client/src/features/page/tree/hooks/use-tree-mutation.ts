@@ -16,14 +16,19 @@ import {
   useMovePageMutation,
   useUpdatePageMutation,
   updateCacheOnMovePage,
+  invalidateOnCreatePage,
 } from "@/features/page/queries/page-query.ts";
+import { createDatabase } from "@/features/database/services/database-service";
 import { buildPageUrl } from "@/features/page/page.utils.ts";
 import { getSpaceUrl } from "@/lib/config.ts";
 import { useQueryEmit } from "@/features/websocket/use-query-emit.ts";
 
 export type UseTreeMutation = {
   handleMove: (sourceId: string, op: DropOp) => Promise<void>;
-  handleCreate: (parentId: string | null) => Promise<void>;
+  handleCreate: (
+    parentId: string | null,
+    kind?: "page" | "database",
+  ) => Promise<void>;
   handleRename: (id: string, name: string) => Promise<void>;
   handleDelete: (id: string) => Promise<void>;
 };
@@ -131,14 +136,38 @@ export function useTreeMutation(spaceId: string): UseTreeMutation {
   );
 
   const handleCreate = useCallback(
-    async (parentId: string | null) => {
+    async (parentId: string | null, kind: "page" | "database" = "page") => {
       const payload: { spaceId: string; parentPageId?: string } = { spaceId };
       if (parentId) payload.parentPageId = parentId;
 
       let createdPage: IPage;
       try {
-        createdPage = await createPageMutation.mutateAsync(payload);
+        if (kind === "database") {
+          createdPage = (
+            await createDatabase({
+              ...payload,
+              defaultNames: {
+                view: t("Table"),
+                status: t("Status"),
+                todo: t("Not started"),
+                inProgress: t("In progress"),
+                done: t("Done"),
+              },
+            })
+          ).database;
+          invalidateOnCreatePage(createdPage);
+        } else {
+          createdPage = await createPageMutation.mutateAsync(payload);
+        }
       } catch {
+        // The page mutation already shows its own error toast.
+        if (kind === "database") {
+          notifications.show({
+            message: t("Failed to create database"),
+            color: "red",
+          });
+          return;
+        }
         throw new Error("Failed to create page");
       }
 
@@ -150,6 +179,7 @@ export function useTreeMutation(spaceId: string): UseTreeMutation {
         spaceId: createdPage.spaceId,
         parentPageId: createdPage.parentPageId,
         hasChildren: false,
+        type: createdPage.type,
         children: [],
       };
 

@@ -233,6 +233,30 @@ export interface Comments {
   workspaceId: string;
 }
 
+export interface DatabaseProperties {
+  config: Generated<Json>;
+  createdAt: Generated<Timestamp>;
+  databaseId: string;
+  id: Generated<string>;
+  name: string;
+  position: string;
+  type: string;
+  updatedAt: Generated<Timestamp>;
+  workspaceId: string;
+}
+
+export interface DatabaseViews {
+  config: Generated<Json>;
+  createdAt: Generated<Timestamp>;
+  databaseId: string;
+  id: Generated<string>;
+  name: string;
+  position: string;
+  type: string;
+  updatedAt: Generated<Timestamp>;
+  workspaceId: string;
+}
+
 export interface Favorites {
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
@@ -901,6 +925,7 @@ export interface Pages {
   coverPhoto: string | null;
   createdAt: Generated<Timestamp>;
   creatorId: string | null;
+  databaseId: string | null;
   deletedAt: Timestamp | null;
   deletedById: string | null;
   icon: string | null;
@@ -909,6 +934,7 @@ export interface Pages {
   lastUpdatedById: string | null;
   parentPageId: string | null;
   position: string | null;
+  properties: Generated<Json>;
   slugId: string;
   sourceCreatorName: string | null;
   sourceLastUpdatedByName: string | null;
@@ -916,6 +942,7 @@ export interface Pages {
   textContent: string | null;
   title: string | null;
   tsv: string | null;
+  type: Generated<string>;
   updatedAt: Generated<Timestamp>;
   workspaceId: string;
   ydoc: Buffer | null;
@@ -1177,6 +1204,8 @@ export interface DB {
   backlinks: Backlinks;
   billing: Billing;
   comments: Comments;
+  databaseProperties: DatabaseProperties;
+  databaseViews: DatabaseViews;
   favorites: Favorites;
   fileTasks: FileTasks;
   groups: Groups;

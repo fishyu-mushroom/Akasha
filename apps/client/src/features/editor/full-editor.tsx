@@ -24,6 +24,7 @@ import { FixedToolbar } from "@/features/editor/components/fixed-toolbar/fixed-t
 import { useAsideTriggerProps } from "@/hooks/use-toggle-aside.tsx";
 import { DeletedPageBanner } from "@/features/page/trash/components/deleted-page-banner.tsx";
 import clsx from "clsx";
+import { RowPropertiesPanel } from "@/features/database/components/row-properties-panel";
 import {
   PageEditMode,
   usePageEditMode,
@@ -50,6 +51,8 @@ export interface FullEditorProps {
   creator?: PageUser;
   contributors?: IContributor[];
   canComment?: boolean;
+  /** Set for database rows: shows the row's properties above the body. */
+  databaseId?: string | null;
 }
 
 export function FullEditor({
@@ -62,6 +65,7 @@ export function FullEditor({
   creator,
   contributors,
   canComment,
+  databaseId,
 }: FullEditorProps) {
   const [user] = useAtom(userAtom);
   const fullPageWidth = user.settings?.preferences?.fullPageWidth ?? true;
@@ -92,6 +96,13 @@ export function FullEditor({
         contributors={contributors}
         readOnly={!editable}
       />
+      {databaseId && (
+        <RowPropertiesPanel
+          pageId={pageId}
+          databaseId={databaseId}
+          editable={editable}
+        />
+      )}
       <MemoizedPageEditor
         key={pageEditMode}
         pageId={pageId}

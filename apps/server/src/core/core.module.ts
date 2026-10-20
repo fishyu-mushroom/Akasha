@@ -22,6 +22,7 @@ import { LabelModule } from './label/label.module';
 import { NotificationModule } from './notification/notification.module';
 import { WatcherModule } from './watcher/watcher.module';
 import { FavoriteModule } from './favorite/favorite.module';
+import { DatabaseViewsModule } from './database/database.module';
 import { SessionModule } from './session/session.module';
 import { ClsMiddleware } from 'nestjs-cls';
 import { McpModule } from './mcp/mcp.module';
@@ -38,6 +39,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     AttachmentModule,
     CommentModule,
     FavoriteModule,
+    DatabaseViewsModule,
     SearchModule,
     SpaceModule,
     GroupModule,

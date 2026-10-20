@@ -186,6 +186,9 @@ export class WsService {
         return data.payload?.node?.id ?? null;
       case 'updateOne':
         return data.id ?? null;
+      // Database views invalidate by database page id.
+      case 'invalidate':
+        return data.entity?.[0] === 'database' ? (data.id ?? null) : null;
       default:
         return null;
     }

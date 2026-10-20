@@ -16,6 +16,7 @@ import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
 import { SpaceMemberRepo } from '@akasha/db/repos/space/space-member.repo';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventName } from '../../../common/events/event.contants';
+import { knowledgeEligiblePageSql } from '@akasha/db/repos/llm-wiki/knowledge-page-eligibility';
 
 @Injectable()
 export class PageRepo {
@@ -44,6 +45,9 @@ export class PageRepo {
     'updatedAt',
     'deletedAt',
     'contributorIds',
+    'type',
+    'databaseId',
+    'properties',
   ];
 
   async findById(
@@ -257,6 +261,7 @@ export class PageRepo {
       .where('workspaceId', '=', input.workspaceId)
       .where('spaceId', '=', input.spaceId)
       .where('deletedAt', 'is', null)
+      .where(knowledgeEligiblePageSql('pages'))
       .$if(Boolean(input.afterId), (query) =>
         query.where('id', '>', input.afterId!),
       )
@@ -301,6 +306,7 @@ export class PageRepo {
       .where('spaceId', '=', input.spaceId)
       .where('id', 'in', input.pageIds)
       .where('deletedAt', 'is', null)
+      .where(knowledgeEligiblePageSql('pages'))
       .execute();
   }
 
@@ -683,8 +689,27 @@ export class PageRepo {
       )
       .whereRef('child.parentPageId', '=', 'pages.id')
       .where('child.deletedAt', 'is', null)
+      .where('child.databaseId', 'is', null)
       .limit(1)
       .as('hasChildren');
+  }
+
+  /** True when the page or any live descendant is a database or a row. */
+  async subtreeHasDatabase(pageId: string): Promise<boolean> {
+    const result = await sql<{ found: boolean }>`
+      WITH RECURSIVE tree AS (
+        SELECT id, type, database_id FROM pages
+        WHERE id = ${pageId} AND deleted_at IS NULL
+        UNION ALL
+        SELECT p.id, p.type, p.database_id FROM pages p
+        JOIN tree t ON p.parent_page_id = t.id
+        WHERE p.deleted_at IS NULL
+      )
+      SELECT EXISTS (
+        SELECT 1 FROM tree WHERE type = 'database' OR database_id IS NOT NULL
+      ) AS found
+    `.execute(this.db);
+    return Boolean(result.rows[0]?.found);
   }
 
   async getPageAndDescendants(

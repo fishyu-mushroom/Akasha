@@ -6,6 +6,7 @@ import { ActionIcon, rem } from "@mantine/core";
 import {
   IconChevronDown,
   IconChevronRight,
+  IconDatabase,
   IconFileDescription,
   IconPlus,
   IconPointFilled,
@@ -161,7 +162,13 @@ export function SpaceTreeRow({
         <EmojiPicker
           onEmojiSelect={handleEmojiSelect}
           icon={
-            node.icon ? node.icon : <IconFileDescription size="18" />
+            node.icon ? (
+              node.icon
+            ) : node.type === "database" ? (
+              <IconDatabase size="18" />
+            ) : (
+              <IconFileDescription size="18" />
+            )
           }
           readOnly={!canEdit}
           removeEmojiAction={handleRemoveEmoji}
@@ -174,7 +181,8 @@ export function SpaceTreeRow({
       <div className={classes.actions}>
         <NodeMenu node={node} canEdit={canEdit} />
 
-        {canEdit && (
+        {/* Database rows are created from the database view, not the tree. */}
+        {canEdit && node.type !== "database" && (
           <CreateNode
             node={node}
             isOpen={isOpen}

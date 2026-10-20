@@ -15,7 +15,8 @@ import {
   executeWithCursorPagination,
 } from '@akasha/db/pagination/cursor-pagination';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@akasha/db/types/kysely.types';
+import { KyselyDB, KyselyTransaction } from '@akasha/db/types/kysely.types';
+import { jsonb } from '@akasha/db/repos/database/database.repo';
 import { generateJitteredKeyBetween } from 'fractional-indexing-jittered';
 import { MovePageDto } from '../dto/move-page.dto';
 import { generateSlugId } from '../../../common/helpers';
@@ -91,8 +92,15 @@ export class PageService {
     userId: string,
     workspaceId: string,
     createPageDto: CreatePageDto,
+    options?: {
+      type?: 'page' | 'database';
+      properties?: Record<string, unknown>;
+      trx?: KyselyTransaction;
+    },
   ): Promise<Page> {
     let parentPageId = undefined;
+    // Any page created under a database becomes one of its rows.
+    let databaseId: string | undefined = undefined;
 
     // check if parent page exists
     if (createPageDto.parentPageId) {
@@ -109,6 +117,14 @@ export class PageService {
       }
 
       parentPageId = parentPage.id;
+      if (parentPage.type === 'database') {
+        if (options?.type === 'database') {
+          throw new BadRequestException(
+            'A database cannot be created inside another database',
+          );
+        }
+        databaseId = parentPage.id;
+      }
     }
 
     let content = undefined;
@@ -142,7 +158,12 @@ export class PageService {
       content,
       textContent,
       ydoc,
-    });
+      type: options?.type ?? 'page',
+      databaseId,
+      properties: databaseId
+        ? jsonb(options?.properties ?? {})
+        : undefined,
+    }, options?.trx);
 
     this.generalQueue
       .add(QueueJob.ADD_PAGE_WATCHERS, {
@@ -290,10 +311,13 @@ export class PageService {
         'spaceId',
         'creatorId',
         'deletedAt',
+        'type',
       ])
       .select((eb) => this.pageRepo.withHasChildren(eb))
       .where('deletedAt', 'is', null)
-      .where('spaceId', '=', spaceId);
+      .where('spaceId', '=', spaceId)
+      // Database rows are browsed through the database view, not the tree.
+      .where('databaseId', 'is', null);
 
     if (pageId) {
       query = query.where('parentPageId', '=', pageId);
@@ -375,6 +399,11 @@ export class PageService {
   }
 
   async movePageToSpace(rootPage: Page, spaceId: string, userId: string) {
+    if (await this.pageRepo.subtreeHasDatabase(rootPage.id)) {
+      throw new BadRequestException(
+        'Pages containing a database cannot be moved to another space yet',
+      );
+    }
     let childPageIds: string[] = [];
 
     const allPages = await this.pageRepo.getPageAndDescendants(rootPage.id, {
@@ -492,6 +521,11 @@ export class PageService {
     targetSpaceId: string | undefined,
     authUser: User,
   ) {
+    if (await this.pageRepo.subtreeHasDatabase(rootPage.id)) {
+      throw new BadRequestException(
+        'Pages containing a database cannot be duplicated yet',
+      );
+    }
     const spaceId = targetSpaceId || rootPage.spaceId;
     const isDuplicateInSameSpace =
       !targetSpaceId || targetSpaceId === rootPage.spaceId;
@@ -795,6 +829,10 @@ export class PageService {
     if (movedPage.parentPageId === dto.parentPageId) {
       parentPageId = undefined;
     } else {
+      // Rows only live inside their database; use the database APIs instead.
+      if (movedPage.databaseId) {
+        throw new BadRequestException('Database rows cannot be moved out');
+      }
       // changing the page's parent
       if (dto.parentPageId) {
         const parentPage = await this.pageRepo.findById(dto.parentPageId);
@@ -804,6 +842,11 @@ export class PageService {
           parentPage.spaceId !== movedPage.spaceId
         ) {
           throw new NotFoundException('Parent page not found');
+        }
+        if (parentPage.type === 'database') {
+          throw new BadRequestException(
+            'Pages cannot be moved into a database',
+          );
         }
         parentPageId = parentPage.id;
       }

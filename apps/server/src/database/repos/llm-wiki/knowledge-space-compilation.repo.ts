@@ -68,6 +68,7 @@ import {
   reconcileFollowUpTargetScope,
   reconcileRunTargetScope,
 } from './knowledge-run-scope';
+import { knowledgeEligiblePageSql } from './knowledge-page-eligibility';
 
 export interface RequestRunsInput {
   requests: SpaceRunRequest[];
@@ -380,6 +381,7 @@ export class KnowledgeSpaceCompilationRepo {
       WHERE page.workspace_id = ${input.workspaceId}
         AND page.id IN (${sql.join(sourcePageIds)})
         AND page.deleted_at IS NULL
+        AND ${knowledgeEligiblePageSql('page')}
       ON CONFLICT (workspace_id, source_page_id) DO UPDATE
       SET space_id = EXCLUDED.space_id,
           trigger = EXCLUDED.trigger,
@@ -427,6 +429,7 @@ export class KnowledgeSpaceCompilationRepo {
         AND source_page.id = schedule.source_page_id
         AND source_page.workspace_id = schedule.workspace_id
         AND source_page.deleted_at IS NULL
+        AND ${knowledgeEligiblePageSql('source_page')}
         AND space.id = schedule.space_id
         AND space.workspace_id = schedule.workspace_id
         AND space.deleted_at IS NULL
@@ -628,6 +631,7 @@ export class KnowledgeSpaceCompilationRepo {
           WHERE workspace_id = ${input.workspaceId}
             AND id IN (${sql.join(input.sourcePageIds)})
             AND deleted_at IS NULL
+            AND ${knowledgeEligiblePageSql('pages')}
         `.execute(this.db);
     const pagesBySpace = new Map<string, string[]>();
     for (const row of scopes.rows) {
@@ -703,6 +707,7 @@ export class KnowledgeSpaceCompilationRepo {
         .where('workspaceId', '=', request.workspaceId)
         .where('spaceId', '=', request.spaceId)
         .where('deletedAt', 'is', null)
+        .where(knowledgeEligiblePageSql('pages'))
         .executeTakeFirst();
       if (!page) throw new Error('Knowledge source page is unavailable.');
       await trx
@@ -914,6 +919,7 @@ export class KnowledgeSpaceCompilationRepo {
           AND page.space_id = ${request.spaceId}
           AND page.id = known.source_page_id
           AND page.deleted_at IS NULL
+          AND ${knowledgeEligiblePageSql('page')}
       )
     `.execute(trx);
     return [

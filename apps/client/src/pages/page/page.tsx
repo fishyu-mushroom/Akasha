@@ -17,6 +17,7 @@ import { PageEditModeProvider } from "@/features/editor/page-edit-mode-context";
 import { recordPageVisit } from "@/features/page-visit/services/page-visit-service";
 import { queryClient } from "@/main";
 import { RECENT_PAGE_VISITS_QUERY_KEY } from "@/features/page-visit/queries/page-visit-query";
+import { DatabasePage } from "@/features/database/components/database-page";
 const MemoizedFullEditor = React.memo(FullEditor);
 const MemoizedPageHeader = React.memo(PageHeader);
 const MemoizedHistoryModal = React.memo(HistoryModal);
@@ -123,17 +124,28 @@ function PageContent({ pageSlug }: { pageSlug: string | undefined }) {
         <PageEditModeProvider key={page.id}>
           <MemoizedPageHeader readOnly={!canEdit} />
 
-          <MemoizedFullEditor
-            pageId={page.id}
-            title={page.title}
-            content={page.content}
-            slugId={page.slugId}
-            spaceSlug={page?.space?.slug}
-            editable={canEdit}
-            creator={page.creator}
-            contributors={page.contributors}
-            canComment={canComment}
-          />
+          {page.type === "database" ? (
+            <DatabasePage
+              pageId={page.id}
+              title={page.title}
+              slugId={page.slugId}
+              spaceSlug={page?.space?.slug}
+              editable={canEdit}
+            />
+          ) : (
+            <MemoizedFullEditor
+              pageId={page.id}
+              title={page.title}
+              content={page.content}
+              slugId={page.slugId}
+              spaceSlug={page?.space?.slug}
+              editable={canEdit}
+              creator={page.creator}
+              contributors={page.contributors}
+              canComment={canComment}
+              databaseId={page.databaseId}
+            />
+          )}
         </PageEditModeProvider>
         <MemoizedHistoryModal pageId={page.id} />
       </div>

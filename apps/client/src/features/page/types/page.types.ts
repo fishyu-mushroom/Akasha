@@ -19,6 +19,9 @@ export interface IPage {
   position: string;
   hasChildren: boolean;
   canEdit?: boolean;
+  type?: "page" | "database";
+  databaseId?: string | null;
+  properties?: Record<string, unknown>;
   creator: ICreator;
   lastUpdatedBy: ILastUpdatedBy;
   deletedBy: IDeletedBy;

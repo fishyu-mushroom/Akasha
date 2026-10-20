@@ -8,6 +8,7 @@ import {
 } from "@mantine/core";
 import {
   IconArrowDown,
+  IconDatabase,
   IconDots,
   IconEye,
   IconEyeOff,
@@ -80,6 +81,10 @@ export function SpaceSidebar() {
 
   function handleCreatePage() {
     handleCreate(null);
+  }
+
+  function handleCreateDatabase() {
+    handleCreate(null, "database");
   }
 
   return (
@@ -174,6 +179,30 @@ export function SpaceSidebar() {
                     stroke={2}
                   />
                   <span>{t("New page")}</span>
+                </div>
+              </UnstyledButton>
+            )}
+
+            {spaceAbility.can(
+              SpaceCaslAction.Manage,
+              SpaceCaslSubject.Page,
+            ) && (
+              <UnstyledButton
+                className={classes.menu}
+                onClick={() => {
+                  handleCreateDatabase();
+                  if (mobileSidebarOpened) {
+                    toggleMobileSidebar();
+                  }
+                }}
+              >
+                <div className={classes.menuItemInner}>
+                  <IconDatabase
+                    size={18}
+                    className={classes.menuItemIcon}
+                    stroke={2}
+                  />
+                  <span>{t("New database")}</span>
                 </div>
               </UnstyledButton>
             )}

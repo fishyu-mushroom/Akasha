@@ -4,6 +4,8 @@ import {
   AiChatMessages,
   Attachments,
   Comments,
+  DatabaseProperties,
+  DatabaseViews,
   Groups,
   Labels,
   Notifications,
@@ -284,6 +286,16 @@ export type UpdatableGroupUser = Updateable<Omit<GroupUsers, 'id'>>;
 export type Page = Selectable<Pages>;
 export type InsertablePage = Insertable<Pages>;
 export type UpdatablePage = Updateable<Omit<Pages, 'id'>>;
+
+// Database
+export type DatabaseProperty = Selectable<DatabaseProperties>;
+export type InsertableDatabaseProperty = Insertable<DatabaseProperties>;
+export type UpdatableDatabaseProperty = Updateable<
+  Omit<DatabaseProperties, 'id'>
+>;
+export type DatabaseView = Selectable<DatabaseViews>;
+export type InsertableDatabaseView = Insertable<DatabaseViews>;
+export type UpdatableDatabaseView = Updateable<Omit<DatabaseViews, 'id'>>;
 
 // PageHistory
 export type PageHistory = Selectable<History>;

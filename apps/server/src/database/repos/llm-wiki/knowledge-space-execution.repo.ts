@@ -25,6 +25,7 @@ import {
   parseTargetSourcePageIds,
   reconcileFollowUpTargetScope,
 } from './knowledge-run-scope';
+import { knowledgeEligiblePageSql } from './knowledge-page-eligibility';
 
 export type SpaceJobPhase = 'text' | 'finalize';
 
@@ -1367,6 +1368,7 @@ export class KnowledgeSpaceExecutionRepo {
         WHERE page.workspace_id = ${run.workspaceId}
           AND page.space_id = ${run.spaceId}
           AND page.deleted_at IS NULL
+          AND ${knowledgeEligiblePageSql('page')}
           ${targetFilter}
         ON CONFLICT (run_id, source_page_id) DO NOTHING
       `.execute(trx);

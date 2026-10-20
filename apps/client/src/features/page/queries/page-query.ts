@@ -388,6 +388,7 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
     slugId: data.slugId,
     spaceId: data.spaceId,
     title: data.title,
+    type: data.type,
   };
 
   let queryKey: QueryKey = null;

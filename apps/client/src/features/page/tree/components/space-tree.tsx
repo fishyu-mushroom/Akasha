@@ -85,6 +85,8 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
 
     const fetchData = async () => {
       if (isDataLoaded && currentPage) {
+        // Database rows are not tree nodes; the database itself stays put.
+        if (currentPage.databaseId) return;
         // check if pageId node is present in the tree
         const node = treeModel.find(data, currentPage.id);
         if (node) {

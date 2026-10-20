@@ -1,0 +1,76 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-top: 1px solid var(--mantine-color-default-border);
+  border-left: 1px solid var(--mantine-color-default-border);
+}
+
+.weekday {
+  padding: 4px 8px;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--mantine-color-dimmed);
+  border-right: 1px solid var(--mantine-color-default-border);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.day {
+  min-height: 110px;
+  padding: 4px;
+  border-right: 1px solid var(--mantine-color-default-border);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.day[data-outside] {
+  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+}
+
+.day[data-over] {
+  background: light-dark(var(--mantine-color-blue-0), var(--mantine-color-dark-5));
+}
+
+.dayNumber {
+  font-size: var(--mantine-font-size-xs);
+  padding: 0 4px;
+  border-radius: var(--mantine-radius-sm);
+}
+
+.day[data-outside] .dayNumber {
+  color: var(--mantine-color-dimmed);
+}
+
+.dayNumber[data-today] {
+  background: var(--mantine-color-red-filled);
+  color: var(--mantine-color-white);
+}
+
+.addButton {
+  opacity: 0;
+}
+
+.day:hover .addButton,
+.addButton:focus-visible {
+  opacity: 1;
+}
+
+.item {
+  display: block;
+  width: 100%;
+  padding: 2px 6px;
+  border-radius: var(--mantine-radius-sm);
+  border: 1px solid var(--mantine-color-default-border);
+  background: var(--mantine-color-body);
+  font-size: var(--mantine-font-size-xs);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.item:hover {
+  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
+}

@@ -27,6 +27,7 @@ import { NotificationRepo } from '@akasha/db/repos/notification/notification.rep
 import { WatcherRepo } from '@akasha/db/repos/watcher/watcher.repo';
 import { LabelRepo } from '@akasha/db/repos/label/label.repo';
 import { FavoriteRepo } from '@akasha/db/repos/favorite/favorite.repo';
+import { DatabaseRepo } from '@akasha/db/repos/database/database.repo';
 import { TemplateRepo } from '@akasha/db/repos/template/template.repo';
 import { PageListener } from '@akasha/db/listeners/page.listener';
 import { PostgresJSDialect } from 'kysely-postgres-js';
@@ -97,6 +98,7 @@ export {
     AnalyticsEventRepo,
     CommentRepo,
     FavoriteRepo,
+    DatabaseRepo,
     AttachmentRepo,
     UserTokenRepo,
     UserSessionRepo,
@@ -137,6 +139,7 @@ export {
     AnalyticsEventRepo,
     CommentRepo,
     FavoriteRepo,
+    DatabaseRepo,
     AttachmentRepo,
     UserTokenRepo,
     UserSessionRepo,
